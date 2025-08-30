@@ -1,16 +1,16 @@
-import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition } from '../schemas/coupon.schema';
+import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
 import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
-import { DeliveryCostInput, DeliveryCostInputSchema, Package } from '../schemas/package.schema';
+import { DeliveryBatch, DeliveryBatchSchema, Package } from '../schemas/package.schema';
 
 export class CalculateCostService {
   private couponConfig: CouponConfig;
   private rateConfig: RateConfig;
-  private deliveryCostInput: DeliveryCostInput;
+  private deliveryCostInput: DeliveryBatch;
 
   constructor(
     couponConfig: CouponConfig,
     rateConfig: RateConfig,
-    deliveryCostInput: DeliveryCostInput
+    deliveryCostInput: DeliveryBatch
   ) {
     const couponValidation = CouponConfigSchema.safeParse(couponConfig);
     const rateValidation = RateConfigSchema.safeParse(rateConfig);
@@ -19,7 +19,7 @@ export class CalculateCostService {
       throw new Error('Invalid coupon or rate configuration');
     }
 
-    const deliveryValidation = DeliveryCostInputSchema.safeParse(deliveryCostInput);
+    const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryCostInput);
 
     if (!deliveryValidation.success) {
       throw new Error('Invalid delivery cost input');
@@ -30,13 +30,26 @@ export class CalculateCostService {
     this.deliveryCostInput = deliveryCostInput;
   }
 
-  // pure function
-  private calculateCostBeforeDiscount(singlePackage: Package, rateConfig: RateConfig, baseDeliveryCost: number): number {
-    return baseDeliveryCost + rateConfig.weight * singlePackage.weight + rateConfig.distance * singlePackage.distance;
+  public calculateDiscount(costBeforeDiscount: number, offerCode: string, coupons: Coupon[]): number {
+    const coupon = coupons.find((coupon) => coupon.code === offerCode);
+    if (!coupon) {
+      return costBeforeDiscount;
+    }
+
+    // TODO: Implement discount calculation logic
+    return costBeforeDiscount;
   }
 
-  private shouldDiscountApply(singlePackage: Package, offerCode: string): boolean {
-    const coupon = this.couponConfig.coupons.find((coupon) => coupon.code === offerCode);
+}
+
+// pure function
+function calculateCostBeforeDiscount(singlePackage: Package, rateConfig: RateConfig, baseDeliveryCost: number): number {
+    return baseDeliveryCost + rateConfig.weight * singlePackage.weight + rateConfig.distance * singlePackage.distance;
+}
+
+// pure function
+function shouldDiscountApply(singlePackage: Package, offerCode: string, coupons: Coupon[]): boolean {
+    const coupon = coupons.find((coupon) => coupon.code === offerCode);
 
     if (!coupon) {
       return false;
@@ -58,20 +71,4 @@ export class CalculateCostService {
     });
 
     return allConditionsMet;
-  }
-    
-  
-
-
-
-  public calculateDiscount(costBeforeDiscount: number, offerCode: string): number {
-    const coupon = this.couponConfig.coupons.find((coupon) => coupon.code === offerCode);
-    if (!coupon) {
-      return costBeforeDiscount;
-    }
-
-    // TODO: Implement discount calculation logic
-    return costBeforeDiscount;
-  }
-
 }

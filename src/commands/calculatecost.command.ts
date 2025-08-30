@@ -1,9 +1,9 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryCostInput, InitialInput, InitialInputSchema, Package, PackageSchema} from '../schemas/package.schema';
+import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
 
 export class CalculateCostCommand {
-  private deliveryCostInput: DeliveryCostInput = {
+  private deliveryCostInput: DeliveryBatch = {
     baseDeliveryCost: 0,
     numberOfPackages: 0,
     packages: []
@@ -15,7 +15,7 @@ export class CalculateCostCommand {
     this.displaySummary();
   }
   
-  public getDeliveryCostInput(): DeliveryCostInput {
+  public getDeliveryCostInput(): DeliveryBatch {
     return structuredClone(this.deliveryCostInput);
   }
 
@@ -106,7 +106,7 @@ export function validateInitialDetails(input: string): boolean | string {
   }
 
   // Use Zod schema for validation
-  const result = InitialInputSchema.safeParse({
+  const result = BaseCostNumPackagesSchema.safeParse({
     baseDeliveryCost,
     numberOfPackages
   });
@@ -144,14 +144,14 @@ export function validatePackageDetails(input: string): boolean | string {
   return true;
 }
 
-export function processInitialDetails(input: string): InitialInput {
+export function processInitialDetails(input: string): BaseCostNumPackages {
   if (!input) {
     throw new Error('Input is required');
   }
   
   const [baseDeliveryCostStr, numberOfPackagesStr] = input.trim().split(/\s+/);
 
-  return InitialInputSchema.parse({
+  return BaseCostNumPackagesSchema.parse({
     baseDeliveryCost: Number(baseDeliveryCostStr),
     numberOfPackages: Number(numberOfPackagesStr)
   });

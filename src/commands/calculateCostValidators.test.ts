@@ -1,5 +1,5 @@
 import { validateInitialDetails, validatePackageDetails, processInitialDetails, processPackageDetails } from './calculatecost.command';
-import { InitialInputSchema, PackageSchema } from '../schemas/package.schema';
+import { DeliveryBatchSchema, PackageSchema } from '../schemas/package.schema';
 
 // Mock process.exit to prevent tests from exiting
 jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
