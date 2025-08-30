@@ -1,6 +1,8 @@
 import run from 'inquirer-test';
 import { ENTER, DOWN } from 'inquirer-test';
 
+
+            const askingForPackageDetailsString = [ "Enter details for package", "pkg_id pkg_weight_in_kg distance_in_km"];
 describe('CLI entrypoint',
     () => {
         it('should allow selecting calculatecost', async () => {
@@ -14,29 +16,34 @@ describe('CLI entrypoint',
             expect(result).toContain('Enter base_delivery_cost and no_of_packages (e.g., "100 3")');
         });
         
-        it('should display prompt for package details after selecting Calculate Cost', async () => {
+        it('should not allow zero number of packages', async () => {
             const result = await run(['dist/index.js'], [ENTER, ENTER, "100 0", ENTER]);
-            expect(result).not.toContain('Enter package details (e.g., "pkg_id pkg_weight_in_kg distance_in_km offer_code")');
+            askingForPackageDetailsString.forEach(str => expect(result).not.toContain(str));
         });
         
-        it('should display prompt for package details after selecting Calculate Cost', async () => {
+        it('should allow zero base cost', async () => {
             const result = await run(['dist/index.js'], [ENTER, ENTER, "0 3", ENTER]);
-            expect(result).toContain('Enter package details (e.g., "pkg_id pkg_weight_in_kg distance_in_km offer_code")');
+
+            askingForPackageDetailsString.forEach(str => expect(result).toContain(str));
         });
 
         it('should display prompt for package details after selecting Calculate Cost', async () => {
             const result = await run(['dist/index.js'], [ENTER, ENTER, "100 3", ENTER]);
-            expect(result).toContain('Enter package details (e.g., "pkg_id pkg_weight_in_kg distance_in_km offer_code")');
+            askingForPackageDetailsString.forEach(str => expect(result).toContain(str));
         });
 
         it('should display prompt for package details after selecting Calculate Cost, and adding another package', async () => {
             const result = await run(['dist/index.js'], [ENTER, ENTER, "100 3", ENTER, "pkg1 1 1 OFFER10", ENTER]);
-            expect(result).toContain('Enter package details (e.g., "pkg_id pkg_weight_in_kg distance_in_km offer_code")');
+            askingForPackageDetailsString.forEach(str => expect(result).toContain(str));
         });
 
-
-        it('should display prompt for package details after selecting Calculate Cost, and adding another package', async () => {
-            const result = await run(['dist/index.js'], [ENTER, ENTER, "100 3", ENTER, "pkg1 1 1 OFFER10", ENTER, "pkg2 1 1 OFFER20", ENTER, "pkg3 1 1 OFFER30", ENTER]);
+        it('should display prompt for package details after selecting Calculate Cost, and adding another package, upto limit', async () => {
+            const packageCount = 3;
+            const promptArray: string[] = [];
+            for (let i = 0; i < packageCount; i++) {
+                promptArray.push(`pkg${i+1} 1 1 OFFER${i+10}`);
+            }
+            const result = await run(['dist/index.js'], [ENTER, ENTER, "100 " + packageCount, ...promptArray.map(p => [ENTER, p]).flat()]);
             const expectedStrings = [
                 'Package Summary:',
                 'Base Delivery Cost',
@@ -50,6 +57,4 @@ describe('CLI entrypoint',
             expectedStrings.forEach(str => expect(result).toContain(str));
             
         });
-
-
     });

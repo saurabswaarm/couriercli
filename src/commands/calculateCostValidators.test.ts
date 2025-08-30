@@ -1,5 +1,5 @@
-import { validateInitialDetails, validatePackageDetails, processInitialDetails, processPackageDetails } from '../../src/commands/calculatecost.command';
-import { InitialInputSchema, PackageSchema } from '../../src/schemas/package.schema';
+import { validateInitialDetails, validatePackageDetails, processInitialDetails, processPackageDetails } from './calculatecost.command';
+import { InitialInputSchema, PackageSchema } from '../schemas/package.schema';
 
 // Mock process.exit to prevent tests from exiting
 jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -28,8 +28,11 @@ describe('calculatecost.command validators', () => {
       expect(() => validateInitialDetails('100 3.5')).toThrow('Invalid input: expected int, received number');
     });
 
-    it('should throw error for zero values', () => {
-      expect(() => validateInitialDetails('0 0')).toThrow('Base delivery cost must be a positive number');
+    it('should throw error for zero packages', () => {
+      expect(() => validateInitialDetails('100 0')).toThrow('Number of packages must be a positive integer');
+    });
+    it('should not throw error for zero base delivery cost', () => {
+      expect(() => validateInitialDetails('0 3')).not.toThrow();
     });
   });
 

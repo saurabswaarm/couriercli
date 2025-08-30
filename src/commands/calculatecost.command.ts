@@ -142,6 +142,11 @@ export function validatePackageDetails(input: string): boolean | string {
 }
 
 export function processInitialDetails(input: string): InitialInput {
+  // Handle undefined or null input
+  if (!input) {
+    throw new Error('Input is required');
+  }
+  
   const [baseDeliveryCostStr, numberOfPackagesStr] = input.trim().split(/\s+/);
 
   return InitialInputSchema.parse({
