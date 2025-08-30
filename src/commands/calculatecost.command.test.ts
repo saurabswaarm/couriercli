@@ -58,8 +58,8 @@ describe('CalculateCostCommand', () => {
       await (calculateCostCommand as any).promptInitialDetails();
 
       // Verify the private properties were set correctly
-      expect((calculateCostCommand as any).baseDeliveryCost).toBe(100);
-      expect((calculateCostCommand as any).numberOfPackages).toBe(3);
+      expect((calculateCostCommand as any).deliveryCostInput.baseDeliveryCost).toBe(100);
+      expect((calculateCostCommand as any).deliveryCostInput.numberOfPackages).toBe(3);
     });
 
     it('should throw error for invalid input', async () => {
@@ -77,7 +77,7 @@ describe('CalculateCostCommand', () => {
   describe('promptPackageDetails', () => {
     it('should call promptSinglePackageDetails for each package', async () => {
       // Set the numberOfPackages
-      (calculateCostCommand as any).numberOfPackages = 2;
+      (calculateCostCommand as any).deliveryCostInput.numberOfPackages = 2;
       
       // Mock the promptSinglePackageDetails method
       const promptSinglePackageDetailsSpy = jest.spyOn(calculateCostCommand as any, 'promptSinglePackageDetails')
@@ -106,14 +106,14 @@ describe('CalculateCostCommand', () => {
       inquirerPromptSpy.mockResolvedValueOnce({ packageDetails: 'PKG1 5 5 OFR001' });
       
       // Initialize the packages array
-      (calculateCostCommand as any).packages = [];
+      (calculateCostCommand as any).deliveryCostInput.packages = [];
 
       // Call the method
       await (calculateCostCommand as any).promptSinglePackageDetails(1);
 
       // Verify that the package was added to the array
-      expect((calculateCostCommand as any).packages).toHaveLength(1);
-      expect((calculateCostCommand as any).packages[0]).toEqual({
+      expect((calculateCostCommand as any).deliveryCostInput.packages).toHaveLength(1);
+      expect((calculateCostCommand as any).deliveryCostInput.packages[0]).toEqual({
         packageId: 'PKG1',
         weight: 5,
         distance: 5,
@@ -126,7 +126,7 @@ describe('CalculateCostCommand', () => {
       inquirerPromptSpy.mockResolvedValueOnce({ packageDetails: '' });
       
       // Initialize the packages array
-      (calculateCostCommand as any).packages = [];
+      (calculateCostCommand as any).deliveryCostInput.packages = [];
 
       // Expect the method to throw an error
       await expect((calculateCostCommand as any).promptSinglePackageDetails(1)).rejects.toThrow();
@@ -139,8 +139,8 @@ describe('CalculateCostCommand', () => {
   describe('displaySummary', () => {
     it('should display package summary correctly', async () => {
       // Set up the command with some package data
-      (calculateCostCommand as any).baseDeliveryCost = 100;
-      (calculateCostCommand as any).packages = [
+      (calculateCostCommand as any).deliveryCostInput.baseDeliveryCost = 100;
+      (calculateCostCommand as any).deliveryCostInput.packages = [
         { packageId: 'PKG1', weight: 5, distance: 5, offerCode: 'OFR001' },
         { packageId: 'PKG2', weight: 10, distance: 10 },
       ];
@@ -164,8 +164,8 @@ describe('CalculateCostCommand', () => {
 
     it('should display N/A for packages without offer codes', async () => {
       // Set up the command with a package that has no offer code
-      (calculateCostCommand as any).baseDeliveryCost = 100;
-      (calculateCostCommand as any).packages = [
+      (calculateCostCommand as any).deliveryCostInput.baseDeliveryCost = 100;
+      (calculateCostCommand as any).deliveryCostInput.packages = [
         { packageId: 'PKG1', weight: 5, distance: 5 },
       ];
 

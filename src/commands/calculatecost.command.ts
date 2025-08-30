@@ -1,17 +1,22 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryCostInputSchema, InitialInput, InitialInputSchema, PackageSchema } from '../schemas/package.schema';
+import { DeliveryCostInput, DeliveryCostInputSchema, InitialInput, InitialInputSchema, PackageSchema, PackageType } from '../schemas/package.schema';
 
-// Validator functions moved outside the class
 export class CalculateCostCommand {
-  private baseDeliveryCost: number = 0;
-  private numberOfPackages: number = 0;
-  private packages: Array<z.infer<typeof PackageSchema>> = [];
+  private deliveryCostInput: DeliveryCostInput = {
+    baseDeliveryCost: 0,
+    numberOfPackages: 0,
+    packages: []
+  };
 
   public async execute(): Promise<void> {
     await this.promptInitialDetails();
     await this.promptPackageDetails();
     this.displaySummary();
+  }
+  
+  public getDeliveryCostInput(): DeliveryCostInput {
+    return structuredClone(this.deliveryCostInput);
   }
 
   private async promptInitialDetails(): Promise<void> {
@@ -26,8 +31,8 @@ export class CalculateCostCommand {
       ]);
 
       const parsedInput = processInitialDetails(initialAnswer.initialDetails);
-      this.baseDeliveryCost = parsedInput.baseDeliveryCost;
-      this.numberOfPackages = parsedInput.numberOfPackages;
+      this.deliveryCostInput.baseDeliveryCost = parsedInput.baseDeliveryCost;
+      this.deliveryCostInput.numberOfPackages = parsedInput.numberOfPackages;
     } catch (error) {
       console.error('Error:', error);
       throw error;
@@ -35,7 +40,7 @@ export class CalculateCostCommand {
   }
 
   private async promptPackageDetails(): Promise<void> {
-    for (let i = 0; i < this.numberOfPackages; i++) {
+    for (let i = 0; i < this.deliveryCostInput.numberOfPackages; i++) {
       await this.promptSinglePackageDetails(i + 1);
     }
     this.displaySummary();
@@ -53,7 +58,7 @@ export class CalculateCostCommand {
       ]);
 
       const packageData = processPackageDetails(packageAnswer.packageDetails);
-      this.packages.push(packageData);
+      this.deliveryCostInput.packages.push(packageData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error('Validation error:', error.format());
@@ -66,8 +71,8 @@ export class CalculateCostCommand {
 
   private displaySummary(): void {
     console.log('\nPackage Summary:');
-    console.log(`Base Delivery Cost: ${this.baseDeliveryCost}`);
-    console.log(`Number of Packages: ${this.packages.length}`);
+    console.log(`Base Delivery Cost: ${this.deliveryCostInput.baseDeliveryCost}`);
+    console.log(`Number of Packages: ${this.deliveryCostInput.packages.length}`);
 
     console.log('\nPackage Details:');
 
@@ -79,7 +84,7 @@ export class CalculateCostCommand {
     console.log(separator);
 
     // Display each package in a table row
-    this.packages.forEach((pkg) => {
+    this.deliveryCostInput.packages.forEach((pkg) => {
       const offerCode = pkg.offerCode || 'N/A';
       console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
     });
@@ -125,7 +130,6 @@ export function validatePackageDetails(input: string): boolean | string {
   const distance = Number(parts[2]);
   const offerCode = parts.length > 3 ? parts[3] : undefined;
 
-  // Use Zod schema for validation
   const result = PackageSchema.safeParse({
     packageId,
     weight,
@@ -134,7 +138,6 @@ export function validatePackageDetails(input: string): boolean | string {
   });
 
   if (!result.success) {
-    // Return the first error message
     throw result.error.issues[0].message;
   }
 
@@ -142,7 +145,6 @@ export function validatePackageDetails(input: string): boolean | string {
 }
 
 export function processInitialDetails(input: string): InitialInput {
-  // Handle undefined or null input
   if (!input) {
     throw new Error('Input is required');
   }
