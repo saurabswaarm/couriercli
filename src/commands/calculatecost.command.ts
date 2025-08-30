@@ -86,7 +86,7 @@ export class CalculateCostCommand {
   }
 }
 
-function validateInitialDetails(input: string): boolean | string {
+export function validateInitialDetails(input: string): boolean | string {
   const parts = input.trim().split(/\s+/);
   if (parts.length !== 2) {
     return 'Please provide both base delivery cost and number of packages separated by a space.';
@@ -114,7 +114,7 @@ function validateInitialDetails(input: string): boolean | string {
   return true;
 }
 
-function validatePackageDetails(input: string): boolean | string {
+export function validatePackageDetails(input: string): boolean | string {
   const parts = input.trim().split(/\s+/);
   if (parts.length < 3 || parts.length > 4) {
     return 'Please provide package ID, weight, distance, and optional offer code.';
@@ -141,7 +141,7 @@ function validatePackageDetails(input: string): boolean | string {
   return true;
 }
 
-function processInitialDetails(input: string): InitialInput {
+export function processInitialDetails(input: string): InitialInput {
   const [baseDeliveryCostStr, numberOfPackagesStr] = input.trim().split(/\s+/);
 
   return InitialInputSchema.parse({
@@ -150,7 +150,7 @@ function processInitialDetails(input: string): InitialInput {
   });
 }
 
-function processPackageDetails(input: string): z.infer<typeof PackageSchema> {
+export function processPackageDetails(input: string): z.infer<typeof PackageSchema> {
     const parts = input.trim().split(/\s+/);
     const packageId = parts[0];
     const weight = Number(parts[1]);
