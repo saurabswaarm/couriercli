@@ -52,6 +52,6 @@
     }
   ],
   "validationRules": {
-    "combinedConditions": false
+    "combinedCoupons": false
   }
 }

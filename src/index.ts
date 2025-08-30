@@ -8,7 +8,7 @@ import couponConfig from '../configs/coupon-config.json';
 
 async function main(): Promise<void> {
   try {
-    const couponConfigZod = CouponConfigSchema.safeParse(couponConfig);
+    const couponConfigZod = CouponConfigSchema.parse(couponConfig);
     const answer = await inquirer.prompt([
       {
         type: 'list',
