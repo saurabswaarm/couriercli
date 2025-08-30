@@ -25,6 +25,8 @@ async function main(): Promise<void> {
       case 'calculatecost':
         const calculateCostCommand = new CalculateCostCommand();
         await calculateCostCommand.execute();
+        const deliveryCostInput = calculateCostCommand.getDeliveryCostInput();
+        console.log(deliveryCostInput);
         break;
       case 'calculatetime':
         const calculateTimeCommand = new CalculateTimeCommand();

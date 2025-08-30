@@ -7,14 +7,12 @@ export const PackageSchema = z.object({
   offerCode: z.string().optional(),
 });
 
-export type Package = z.infer<typeof PackageSchema>;
 
 export const InitialInputSchema = z.object({
   baseDeliveryCost: z.number().min(0, 'Base delivery cost must be a positive number'),
   numberOfPackages: z.number().int().positive('Number of packages must be a positive integer'),
 });
 
-export type InitialInput = z.infer<typeof InitialInputSchema>;
 
 export const DeliveryCostInputSchema = z.object({
   baseDeliveryCost: InitialInputSchema.shape.baseDeliveryCost,
@@ -23,6 +21,5 @@ export const DeliveryCostInputSchema = z.object({
 });
 
 export type DeliveryCostInput = z.infer<typeof DeliveryCostInputSchema>;
-export type IntialInput = z.infer<typeof InitialInputSchema>;
-export type PackageType = z.infer<typeof PackageSchema>;
-
+export type InitialInput = z.infer<typeof InitialInputSchema>;
+export type Package = z.infer<typeof PackageSchema>;

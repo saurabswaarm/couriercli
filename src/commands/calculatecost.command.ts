@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryCostInput, DeliveryCostInputSchema, InitialInput, InitialInputSchema, PackageSchema, PackageType } from '../schemas/package.schema';
+import { DeliveryCostInput, InitialInput, InitialInputSchema, Package, PackageSchema} from '../schemas/package.schema';
 
 export class CalculateCostCommand {
   private deliveryCostInput: DeliveryCostInput = {
@@ -157,7 +157,7 @@ export function processInitialDetails(input: string): InitialInput {
   });
 }
 
-export function processPackageDetails(input: string): z.infer<typeof PackageSchema> {
+export function processPackageDetails(input: string): Package {
     const parts = input.trim().split(/\s+/);
     const packageId = parts[0];
     const weight = Number(parts[1]);
