@@ -30,26 +30,26 @@ export class CalculateCostService {
     this.deliveryBatch = deliveryBatch;
   }
 
-  public calculateDiscount(costBeforeDiscount: number, offerCode: string, coupons: Coupon[]): number {
-    const coupon = coupons.find((coupon) => coupon.code === offerCode);
-    if (!coupon) {
-      return costBeforeDiscount;
-    }
+  public calculateDiscount(): string[] {
 
-    // TODO: Implement discount calculation logic
-    return costBeforeDiscount;
+    const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
+      const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
+      const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons[0]) : costBeforeDiscount;
+      return `${singlePackage.packageId} ${singlePackage.weight} ${singlePackage.distance} ${discount}`
+    });
+    return discountedList;
   }
 
 }
 
 // pure function
-function calculateCostBeforeDiscount(singlePackage: Package, rateConfig: RateConfig, baseDeliveryCost: number): number {
+export function calculateCostBeforeDiscount(singlePackage: Package, rateConfig: RateConfig, baseDeliveryCost: number): number {
     return baseDeliveryCost + rateConfig.weight * singlePackage.weight + rateConfig.distance * singlePackage.distance;
 }
 
 // pure function
-function shouldDiscountApply(singlePackage: Package, offerCode: string, coupons: Coupon[]): boolean {
-    const coupon = coupons.find((coupon) => coupon.code === offerCode);
+export function shouldDiscountApply(singlePackage: Package, coupons: Coupon[]): boolean {
+    const coupon = coupons.find((coupon) => coupon.code === singlePackage.offerCode);
 
     if (!coupon) {
       return false;
@@ -71,4 +71,9 @@ function shouldDiscountApply(singlePackage: Package, offerCode: string, coupons:
     });
 
     return allConditionsMet;
+}
+
+// pure function
+export function calculateDiscount(costBeforeDiscount: number, coupon: Coupon): number {
+    return costBeforeDiscount - (costBeforeDiscount * coupon.discount / 100);
 }
