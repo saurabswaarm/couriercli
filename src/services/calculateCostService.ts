@@ -1,6 +1,7 @@
 import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
 import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
 import { DeliveryBatch, DeliveryBatchSchema, Package } from '../schemas/package.schema';
+import { Bill, BillSchema } from '../schemas/bill.schema';
 
 export class CalculateCostService {
   private couponConfig: CouponConfig;
@@ -30,12 +31,25 @@ export class CalculateCostService {
     this.deliveryBatch = deliveryBatch;
   }
 
-  public calculateDiscount(): string[] {
-
+  public calculateBill(): Bill[] {
     const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
       const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
-      const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons[0]) : costBeforeDiscount;
-      return `${singlePackage.packageId} ${singlePackage.weight} ${singlePackage.distance} ${discount}`
+      const discount = calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode));
+      const costAfterDiscount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? costBeforeDiscount - discount : costBeforeDiscount;
+      
+      const bill: Bill = {
+        packageId: singlePackage.packageId,
+        discount: discount,
+        totalCost: costAfterDiscount
+      };
+      
+      // Validate the bill object against the schema
+      const billValidation = BillSchema.safeParse(bill);
+      if (!billValidation.success) {
+        throw new Error('Invalid bill generated');
+      }
+      
+      return bill;
     });
     return discountedList;
   }
@@ -74,6 +88,9 @@ export function shouldDiscountApply(singlePackage: Package, coupons: Coupon[]): 
 }
 
 // pure function
-export function calculateDiscount(costBeforeDiscount: number, coupon: Coupon): number {
-    return costBeforeDiscount - (costBeforeDiscount * coupon.discount / 100);
+export function calculateDiscount(costBeforeDiscount: number, coupon?: Coupon): number {
+    if (!coupon) {
+      return 0;
+    }
+    return (costBeforeDiscount * coupon.discount / 100);
 }

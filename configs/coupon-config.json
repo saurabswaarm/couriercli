@@ -1,8 +1,8 @@
 {
   "coupons": [
     {
-      "code": "SUMMER25",
-      "pattern": "^SUMMER[0-9]{2}$",
+      "code": "OFR001",
+      "pattern": "^OFR[0-9]{3}$",
       "discount": 25,
       "conditions": [{
         "param": "weight",
@@ -20,8 +20,8 @@
       }]
     },
     {
-      "code": "FREESHIP50",
-      "pattern": "^FREESHIP[0-9]{2}$",
+      "code": "OFR002",
+      "pattern": "^OFR[0-9]{3}$",
       "discount": 50,
       "conditions": [{
         "param": "weight",
@@ -37,8 +37,8 @@
       }]
     },
     {
-      "code": "WELCOME10",
-      "pattern": "^WELCOME[0-9]{2}$",
+      "code": "OFR003",
+      "pattern": "^OFR[0-9]{3}$",
       "discount": 10,
       "conditions": [{
         "param": "weight",

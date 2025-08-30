@@ -2,6 +2,7 @@ import { CalculateCostService, calculateCostBeforeDiscount, shouldDiscountApply,
 import { CouponConfig, ConditionParam, ConditionType } from '../schemas/coupon.schema';
 import { RateConfig } from '../schemas/rate.schema';
 import { DeliveryBatch, Package } from '../schemas/package.schema';
+import { Bill } from '../schemas/bill.schema';
 
 // Mock process.exit to prevent tests from exiting
 jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -80,16 +81,23 @@ describe('CalculateCostService', () => {
     });
   });
 
-  describe('calculateDiscount', () => {
+  describe('calculateBill', () => {
     it('should calculate discount correctly for valid package with matching coupon', () => {
       const service = new CalculateCostService(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
-      const result = service.calculateDiscount();
+      const result = service.calculateBill();
       
       // Calculate expected cost manually
       const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
-      const expectedDiscount = costBeforeDiscount - (costBeforeDiscount * 10 / 100); // 175 - 17.5 = 157.5
+      const discountAmount = costBeforeDiscount * 10 / 100; // 175 * 10 / 100 = 17.5
+      const expectedTotalCost = costBeforeDiscount - discountAmount; // 175 - 17.5 = 157.5
       
-      expect(result).toEqual([`PKG1 5 5 ${expectedDiscount}`]);
+      const expectedBill: Bill = {
+        packageId: 'PKG1',
+        discount: discountAmount,
+        totalCost: expectedTotalCost
+      };
+      
+      expect(result).toEqual([expectedBill]);
     });
 
     it('should not apply discount for package without matching coupon', () => {
@@ -106,12 +114,18 @@ describe('CalculateCostService', () => {
       };
       
       const service = new CalculateCostService(mockCouponConfig, mockRateConfig, batchWithoutCoupon);
-      const result = service.calculateDiscount();
+      const result = service.calculateBill();
       
       // Calculate expected cost manually
       const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
       
-      expect(result).toEqual([`PKG2 5 5 ${costBeforeDiscount}`]);
+      const expectedBill: Bill = {
+        packageId: 'PKG2',
+        discount: 0, // No discount applied
+        totalCost: costBeforeDiscount
+      };
+      
+      expect(result).toEqual([expectedBill]);
     });
   });
 
@@ -182,8 +196,8 @@ describe('CalculateCostService', () => {
     it('should calculate discount correctly', () => {
       const mockCoupon = mockCouponConfig.coupons[0];
       const result = calculateDiscount(200, mockCoupon);
-      // Expected: 200 - (200 * 10 / 100) = 200 - 20 = 180
-      expect(result).toBe(180);
+      // Expected: (200 * 10 / 100) = 20 (the discount amount, not the final cost)
+      expect(result).toBe(20);
     });
   });
 });
