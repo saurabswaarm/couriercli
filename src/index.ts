@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import inquirer from 'inquirer';
+import { CalculateCostCommand } from './commands/calculatecost.command';
+import { CalculateTimeCommand } from './commands/calculatetime.command';
 
 async function main(): Promise<void> {
   try {
@@ -18,8 +20,12 @@ async function main(): Promise<void> {
 
     switch (answer.command) {
       case 'calculatecost':
+        const calculateCostCommand = new CalculateCostCommand();
+        await calculateCostCommand.execute();
         break;
       case 'calculatetime':
+        const calculateTimeCommand = new CalculateTimeCommand();
+        await calculateTimeCommand.execute();
         break;
       default:
         console.error('Invalid command selected');

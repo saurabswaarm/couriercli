@@ -23,4 +23,6 @@ export const DeliveryCostInputSchema = z.object({
 });
 
 export type DeliveryCostInput = z.infer<typeof DeliveryCostInputSchema>;
+export type IntialInput = z.infer<typeof InitialInputSchema>;
+export type PackageType = z.infer<typeof PackageSchema>;
 
