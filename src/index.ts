@@ -3,9 +3,12 @@
 import inquirer from 'inquirer';
 import { CalculateCostCommand } from './commands/calculatecost.command';
 import { CalculateTimeCommand } from './commands/calculatetime.command';
+import { CouponConfigSchema } from './schemas/coupon.schema';
+import couponConfig from '../configs/coupon-config.json';
 
 async function main(): Promise<void> {
   try {
+    const couponConfigZod = CouponConfigSchema.safeParse(couponConfig);
     const answer = await inquirer.prompt([
       {
         type: 'list',
