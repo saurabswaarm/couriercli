@@ -50,6 +50,7 @@ export const ConditionSchema = z.discriminatedUnion('type', [
 export const CouponSchema = z.object({
   code: z.string().min(1, 'Coupon code is required'),
   pattern: z.string().min(1, 'Pattern is required'),
+  discount: z.number().min(0, 'Discount must be a positive number'),
   conditions: z.array(ConditionSchema).min(1, 'At least one condition is required'),
 });
 

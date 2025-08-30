@@ -5,12 +5,12 @@ import { DeliveryBatch, DeliveryBatchSchema, Package } from '../schemas/package.
 export class CalculateCostService {
   private couponConfig: CouponConfig;
   private rateConfig: RateConfig;
-  private deliveryCostInput: DeliveryBatch;
+  private deliveryBatch: DeliveryBatch;
 
   constructor(
     couponConfig: CouponConfig,
     rateConfig: RateConfig,
-    deliveryCostInput: DeliveryBatch
+    deliveryBatch: DeliveryBatch
   ) {
     const couponValidation = CouponConfigSchema.safeParse(couponConfig);
     const rateValidation = RateConfigSchema.safeParse(rateConfig);
@@ -19,7 +19,7 @@ export class CalculateCostService {
       throw new Error('Invalid coupon or rate configuration');
     }
 
-    const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryCostInput);
+    const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryBatch);
 
     if (!deliveryValidation.success) {
       throw new Error('Invalid delivery cost input');
@@ -27,7 +27,7 @@ export class CalculateCostService {
 
     this.couponConfig = couponConfig;
     this.rateConfig = rateConfig;
-    this.deliveryCostInput = deliveryCostInput;
+    this.deliveryBatch = deliveryBatch;
   }
 
   public calculateDiscount(costBeforeDiscount: number, offerCode: string, coupons: Coupon[]): number {

@@ -5,6 +5,7 @@ import { CalculateCostCommand } from './commands/calculatecost.command';
 import { CalculateTimeCommand } from './commands/calculatetime.command';
 import { CouponConfigSchema } from './schemas/coupon.schema';
 import couponConfig from '../configs/coupon-config.json';
+import { ZodError } from 'zod';
 
 async function main(): Promise<void> {
   try {
@@ -37,7 +38,16 @@ async function main(): Promise<void> {
         process.exit(1);
     }
   } catch (error) {
-    console.error('An error occurred:', error);
+    if (error instanceof ZodError) {
+      console.error('Configuration validation error:');
+      error.issues.forEach((err, index) => {
+        console.error(`  ${index + 1}. Path: ${err.path.join(' -> ')}`);
+        console.error(`     Message: ${err.message}`);
+      });
+      console.error('\nPlease check your configuration files and ensure they match the expected schema.');
+    } else {
+      console.error('An error occurred:', error);
+    }
     process.exit(1);
   }
 }
