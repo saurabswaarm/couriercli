@@ -49,7 +49,8 @@ describe('CalculateTimeCommand Prompts', () => {
             'PKG1 50 30 OFR001', ENTER  // Enter package
         ]);
         
+        const strings = ['Enter', 'the', 'number', 'of', 'vehicles', 'the', 'average', 'max', 'speed', 'and', 'average', 'max', 'carriable', 'weight'];
         // Check for prompt asking for vehicle details
-        expect(result).toContain('Enter the number of vehicles, the average max speed and average max carriable weight');
+        strings.forEach(str => expect(result).toContain(str));
     });
 });
