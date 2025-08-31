@@ -129,9 +129,9 @@ describe('CLI entrypoint',
 
             const result = await run(['dist/index.js'], [ENTER, ENTER, "100 " + packageCount, ...promptArray.map(p => [ENTER, p]).flat()]);
             const expectedStrings = [
-                `| ${"PKG1".padEnd(10)} | ${"0".padEnd(10)} | ${"175".padEnd(10)} |`,
-                `| ${"PKG2".padEnd(10)} | ${"0".padEnd(10)} | ${"275".padEnd(10)} |`,
-                `| ${"PKG3".padEnd(10)} | ${"35".padEnd(10)} | ${"665".padEnd(10)} |`,
+                `PKG1 0 175`,
+                `PKG2 0 275`,
+                `PKG3 35 665`,
             ];
             expectedStrings.forEach(str => expect(result).toContain(str));
 

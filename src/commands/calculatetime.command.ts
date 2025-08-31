@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryBatch, hasDeliveryTime, hasDiscountAndTotalCost} from '../schemas/package.schema';
+import { DeliveryBatch, hasDeliveryTime, hasDiscountAndTotalCost } from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
@@ -14,7 +14,7 @@ export class CalculateTimeCommand {
     numberOfPackages: 0,
     packages: []
   };
-  
+
   private fleetCapacity: FleetCapacity = {
     numberOfVehicles: 0,
     maxSpeed: 0,
@@ -27,11 +27,11 @@ export class CalculateTimeCommand {
     await this.promptFleetDetails();
     this.calculateAndDisplayTimes();
   }
-  
+
   public getDeliveryTimeInput(): DeliveryBatch {
     return structuredClone(this.deliveryBatch);
   }
-  
+
   public getFleetCapacity(): FleetCapacity {
     return structuredClone(this.fleetCapacity);
   }
@@ -40,20 +40,20 @@ export class CalculateTimeCommand {
     try {
       const couponConfig = loadCouponConfig();
       const rateConfig = loadRateConfig();
-      
+
       const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
       const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => ({
         ...calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost),
         deliveryTime: packageWithDeliveryTime.deliveryTime,
       }))
-      
-      console.log('\nDelivery Time Calculation Results:');
-      console.log('| Package ID |  Discount | Total Cost | Delivery Time (hours) |');
-      console.log('|------------|-----------|------------|-----------------------|');
-      
+
       packagesWithCostAndDeliveryTime.forEach((packageWithCostAndDeliveryTime) => {
-        // @ts-ignore
-        console.log(`| ${packageWithCostAndDeliveryTime.packageId.padEnd(10)} | ${packageWithCostAndDeliveryTime.discount.toFixed(0).padEnd(9)} | ${packageWithCostAndDeliveryTime.totalCost.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.deliveryTime.toFixed(0).padEnd(10)} |`);
+        if (hasDiscountAndTotalCost(packageWithCostAndDeliveryTime) && hasDeliveryTime(packageWithCostAndDeliveryTime)) {
+          const discount = packageWithCostAndDeliveryTime.discount
+          const totalCost = packageWithCostAndDeliveryTime.totalCost
+          const deliveryTime = packageWithCostAndDeliveryTime.deliveryTime
+          console.log(`${packageWithCostAndDeliveryTime.packageId} ${discount.toFixed(0)} ${totalCost.toFixed(0)} ${deliveryTime.toFixed(0)}`);
+        }
       });
     } catch (error) {
       console.error('Error calculating delivery times:', error);
@@ -108,7 +108,7 @@ export class CalculateTimeCommand {
       throw error;
     }
   }
-  
+
   private async promptFleetDetails(): Promise<void> {
     try {
       const fleetAnswer = await inquirer.prompt([

@@ -16,7 +16,6 @@ export class CalculateCostCommand {
   public async execute(): Promise<void> {
     await this.promptInitialDetails();
     await this.promptPackageDetails();
-    this.displaySummary();
     this.calculateAndDisplayCosts();
   }
   
@@ -48,7 +47,6 @@ export class CalculateCostCommand {
     for (let i = 0; i < this.deliveryCostInput.numberOfPackages; i++) {
       await this.promptSinglePackageDetails(i + 1);
     }
-    this.displaySummary();
   }
 
   private async promptSinglePackageDetails(packageNumber: number): Promise<void> {
@@ -74,25 +72,6 @@ export class CalculateCostCommand {
     }
   }
 
-  private displaySummary(): void {
-    console.log('\nPackage Summary:');
-    console.log(`Base Delivery Cost: ${this.deliveryCostInput.baseDeliveryCost}`);
-    console.log(`Number of Packages: ${this.deliveryCostInput.packages.length}`);
-
-    console.log('\nPackage Details:');
-
-    const header = '| Package ID | Weight (kg) | Distance (km) | Offer Code |';
-    const separator = '|------------|-------------|---------------|------------|';
-
-    console.log(header);
-    console.log(separator);
-
-    this.deliveryCostInput.packages.forEach((pkg) => {
-      const offerCode = pkg.offerCode || 'N/A';
-      console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
-    });
-  }
-
   private calculateAndDisplayCosts(): void {
     try {
       const couponConfig = loadCouponConfig();
@@ -100,12 +79,8 @@ export class CalculateCostCommand {
       
       const packagesWithCost = calculateBill(couponConfig, rateConfig, this.deliveryCostInput);
       
-      console.log('\nCost Calculation Results:');
-      console.log('| Package ID | Discount | Total Cost |');
-      console.log('|------------|----------|------------|');
-      
       packagesWithCost.forEach(packageWithCost => {
-        hasDiscountAndTotalCost(packageWithCost) && console.log(`| ${packageWithCost.packageId.padEnd(10)} | ${packageWithCost.discount.toFixed(0).padEnd(10)} | ${packageWithCost.totalCost.toFixed(0).padEnd(10)} |`);
+        hasDiscountAndTotalCost(packageWithCost) && console.log(`${packageWithCost.packageId} ${packageWithCost.discount.toFixed(0)} ${packageWithCost.totalCost.toFixed(0)}`);
       });
     } catch (error) {
       console.error('Error calculating costs:', error);
