@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema, hasDeliveryTime, hasDiscountAndTotalCost} from '../schemas/package.schema';
+import { DeliveryBatch, hasDeliveryTime, hasDiscountAndTotalCost} from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
@@ -38,15 +38,15 @@ export class CalculateTimeCommand {
   private calculateAndDisplayTimes(): void {
     try {
       // Calculate delivery times using the function
-      const bills = calculateDeliveryTimes(this.deliveryTimeInput, this.fleetCapacity);
+      const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryTimeInput, this.fleetCapacity);
       
       // Display results
       console.log('\nDelivery Time Calculation Results:');
       console.log('| Package ID | Delivery Time (hours) |');
       console.log('|------------|-----------------------|');
       
-      bills.forEach((bill) => {
-        hasDeliveryTime(bill) && hasDiscountAndTotalCost(bill) && console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
+      packagesWithDeliveryTime.forEach((packageWithDeliveryTime) => {
+        hasDeliveryTime(packageWithDeliveryTime) && hasDiscountAndTotalCost(packageWithDeliveryTime) && console.log(`| ${packageWithDeliveryTime.packageId.padEnd(10)} | ${packageWithDeliveryTime.discount.toFixed(0).padEnd(10)} | ${packageWithDeliveryTime.totalCost.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating delivery times:', error);

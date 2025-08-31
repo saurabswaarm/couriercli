@@ -6,7 +6,7 @@ import { Shipment } from '../schemas/shipment.schema';
  * Calculate delivery times for packages using a fleet of vehicles
  * @param deliveryBatch - The batch of packages to deliver
  * @param fleetCapacity - The capacity and specifications of the delivery fleet
- * @returns An array of bills with delivery times for each package
+ * @returns An array of packages with delivery times for each package
  */
 export function calculateDeliveryTimes(deliveryBatch: DeliveryBatch, fleetCapacity: FleetCapacity): Package[] {
     // Helper function to find the next available vehicle
@@ -121,7 +121,7 @@ export function calculateDeliveryTimes(deliveryBatch: DeliveryBatch, fleetCapaci
         vehicleReturnTimes[nextVehicleIndex] = deliveryTime;
     }
 
-    // Convert delivery times to bills
+    // Convert delivery times to packages with delivery times
     return deliveryBatch.packages.map(pkg => ({
         packageId: pkg.packageId,
         weight: pkg.weight,

@@ -104,16 +104,16 @@ export class CalculateCostCommand {
       // Create service instance
       const calculateCostService = new CalculateCostService(couponConfig, rateConfig, this.deliveryCostInput);
       
-      // Calculate bills
-      const bills = calculateCostService.calculateBill();
+      // Calculate packages with cost
+      const packagesWithCost = calculateCostService.calculateBill();
       
       // Display results
       console.log('\nCost Calculation Results:');
       console.log('| Package ID | Discount | Total Cost |');
       console.log('|------------|----------|------------|');
       
-      bills.forEach(bill => {
-        hasDiscountAndTotalCost(bill) && console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
+      packagesWithCost.forEach(packageWithCost => {
+        hasDiscountAndTotalCost(packageWithCost) && console.log(`| ${packageWithCost.packageId.padEnd(10)} | ${packageWithCost.discount.toFixed(0).padEnd(10)} | ${packageWithCost.totalCost.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating costs:', error);

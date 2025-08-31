@@ -36,7 +36,7 @@ export class CalculateCostService {
       const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
       const costAfterDiscount = costBeforeDiscount - discount;
       
-      const bill: Package = {
+      const packageWithCost: Package = {
         packageId: singlePackage.packageId,
         weight: singlePackage.weight,
         distance: singlePackage.distance,
@@ -45,13 +45,13 @@ export class CalculateCostService {
         totalCost: costAfterDiscount,
       };
       
-      // Validate the bill object against the schema
-      const billValidation = PackageSchema.safeParse(bill);
-      if (!billValidation.success) {
-        throw new Error('Invalid bill generated');
+      // Validate the packageWithCost object against the schema
+      const packageValidation = PackageSchema.safeParse(packageWithCost);
+      if (!packageValidation.success) {
+        throw new Error('Invalid package with cost generated');
       }
       
-      return bill;
+      return packageWithCost;
     });
     return discountedList;
   }

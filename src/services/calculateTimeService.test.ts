@@ -54,9 +54,9 @@ describe('CalculateTimeService', () => {
       expect(result).toHaveLength(5);
       
       // All packages should have delivery times
-      result.forEach((bill: any) => {
-        expect(bill.deliveryTime).toBeGreaterThan(0);
-        expect(bill.packageId).toBeDefined();
+      result.forEach((packageWithDeliveryTime: any) => {
+        expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
+        expect(packageWithDeliveryTime.packageId).toBeDefined();
       });
     });
 
@@ -67,8 +67,8 @@ describe('CalculateTimeService', () => {
       expect(result).toHaveLength(5);
       
       // Each delivery time should be positive
-      result.forEach((bill: any) => {
-        expect(bill.deliveryTime).toBeGreaterThan(0);
+      result.forEach((packageWithDeliveryTime: any) => {
+        expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
       });
     });
   });
