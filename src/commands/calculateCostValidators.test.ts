@@ -1,4 +1,5 @@
-import { validateInitialDetails, validatePackageDetails, processInitialDetails, processPackageDetails } from './calculatecost.command';
+import { validateInitialDetails, validatePackageDetails } from '../utils/validationUtils';
+import { processInitialDetails, processPackageDetails } from '../utils/processingUtils';
 import { DeliveryBatchSchema, PackageSchema } from '../schemas/package.schema';
 
 // Mock process.exit to prevent tests from exiting

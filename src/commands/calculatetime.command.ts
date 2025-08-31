@@ -2,6 +2,8 @@ import inquirer from 'inquirer';
 import { z } from 'zod';
 import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
+import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
+import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
 
 export class CalculateTimeCommand {
   private deliveryTimeInput: DeliveryBatch = {
@@ -137,120 +139,3 @@ export class CalculateTimeCommand {
   }
 }
 
-export function validateInitialDetails(input: string): boolean | string {
-  const parts = input.trim().split(/\s+/);
-  if (parts.length !== 2) {
-    return 'Please provide both base delivery cost and number of packages separated by a space.';
-  }
-
-  const baseDeliveryCost = Number(parts[0]);
-  const numberOfPackages = Number(parts[1]);
-
-  if (input === "quit") {
-    console.log('Exiting...');
-    process.exit(0);
-  }
-
-  // Use Zod schema for validation
-  const result = BaseCostNumPackagesSchema.safeParse({
-    baseDeliveryCost,
-    numberOfPackages
-  });
-
-  if (!result.success) {
-    // Return the first error message
-    throw result.error.issues[0].message;
-  }
-
-  return true;
-}
-
-export function validatePackageDetails(input: string): boolean | string {
-  const parts = input.trim().split(/\s+/);
-  if (parts.length < 3 || parts.length > 4) {
-    return 'Please provide package ID, weight, distance, and optional offer code.';
-  }
-
-  const packageId = parts[0];
-  const weight = Number(parts[1]);
-  const distance = Number(parts[2]);
-  const offerCode = parts.length > 3 ? parts[3] : undefined;
-
-  const result = PackageSchema.safeParse({
-    packageId,
-    weight,
-    distance,
-    offerCode
-  });
-
-  if (!result.success) {
-    throw result.error.issues[0].message;
-  }
-
-  return true;
-}
-
-export function validateFleetDetails(input: string): boolean | string {
-  const parts = input.trim().split(/\s+/);
-  if (parts.length !== 3) {
-    return 'Please provide number of vehicles, max speed, and max carriable weight separated by spaces.';
-  }
-
-  const numberOfVehicles = Number(parts[0]);
-  const maxSpeed = Number(parts[1]);
-  const maxCarriableWeight = Number(parts[2]);
-
-  const result = FleetCapacitySchema.safeParse({
-    numberOfVehicles,
-    maxSpeed,
-    maxCarriableWeight
-  });
-
-  if (!result.success) {
-    throw result.error.issues[0].message;
-  }
-
-  return true;
-}
-
-export function processInitialDetails(input: string): BaseCostNumPackages {
-  if (!input) {
-    throw new Error('Input is required');
-  }
-  
-  const [baseDeliveryCostStr, numberOfPackagesStr] = input.trim().split(/\s+/);
-
-  return BaseCostNumPackagesSchema.parse({
-    baseDeliveryCost: Number(baseDeliveryCostStr),
-    numberOfPackages: Number(numberOfPackagesStr)
-  });
-}
-
-export function processPackageDetails(input: string): Package {
-    const parts = input.trim().split(/\s+/);
-    const packageId = parts[0];
-    const weight = Number(parts[1]);
-    const distance = Number(parts[2]);
-    const offerCode = parts.length > 3 ? parts[3] : undefined;
-
-    return PackageSchema.parse({
-      packageId,
-      weight,
-      distance,
-      offerCode
-    });
-  }
-  
-export function processFleetDetails(input: string): FleetCapacity {
-  if (!input) {
-    throw new Error('Input is required');
-  }
-  
-  const [numberOfVehiclesStr, maxSpeedStr, maxCarriableWeightStr] = input.trim().split(/\s+/);
-
-  return FleetCapacitySchema.parse({
-    numberOfVehicles: Number(numberOfVehiclesStr),
-    maxSpeed: Number(maxSpeedStr),
-    maxCarriableWeight: Number(maxCarriableWeightStr)
-  });
-}
