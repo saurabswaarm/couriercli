@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
 import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema, hasDiscountAndTotalCost} from '../schemas/package.schema';
-import { CalculateCostService } from '../services/calculateCostService';
+import { calculateBill } from '../services/calculateCostService';
 import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
 import { validateInitialDetails, validatePackageDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails } from '../utils/processingUtils';
@@ -81,14 +81,12 @@ export class CalculateCostCommand {
 
     console.log('\nPackage Details:');
 
-    // Create table header
     const header = '| Package ID | Weight (kg) | Distance (km) | Offer Code |';
     const separator = '|------------|-------------|---------------|------------|';
 
     console.log(header);
     console.log(separator);
 
-    // Display each package in a table row
     this.deliveryCostInput.packages.forEach((pkg) => {
       const offerCode = pkg.offerCode || 'N/A';
       console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
@@ -97,17 +95,11 @@ export class CalculateCostCommand {
 
   private calculateAndDisplayCosts(): void {
     try {
-      // Load configurations
       const couponConfig = loadCouponConfig();
       const rateConfig = loadRateConfig();
       
-      // Create service instance
-      const calculateCostService = new CalculateCostService(couponConfig, rateConfig, this.deliveryCostInput);
+      const packagesWithCost = calculateBill(couponConfig, rateConfig, this.deliveryCostInput);
       
-      // Calculate packages with cost
-      const packagesWithCost = calculateCostService.calculateBill();
-      
-      // Display results
       console.log('\nCost Calculation Results:');
       console.log('| Package ID | Discount | Total Cost |');
       console.log('|------------|----------|------------|');

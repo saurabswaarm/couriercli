@@ -1,4 +1,4 @@
-import { CalculateCostService, calculateCostBeforeDiscount, shouldDiscountApply, calculateDiscount } from './calculateCostService';
+import { calculateBill, calculateCostBeforeDiscount, shouldDiscountApply, calculateDiscount } from './calculateCostService';
 import { CouponConfig, ConditionParam, ConditionType } from '../schemas/coupon.schema';
 import { RateConfig } from '../schemas/rate.schema';
 import { DeliveryBatch, Package } from '../schemas/package.schema';
@@ -56,34 +56,34 @@ describe('CalculateCostService', () => {
   };
 
   describe('constructor', () => {
-    it('should create an instance with valid configurations', () => {
-      const service = new CalculateCostService(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
-      expect(service).toBeInstanceOf(CalculateCostService);
+    it('should calculate bill with valid configurations', () => {
+      const result = calculateBill(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
+      expect(result).toBeDefined();
+      expect(Array.isArray(result)).toBe(true);
     });
 
     it('should throw error for invalid coupon configuration', () => {
       const invalidCouponConfig = { ...mockCouponConfig, coupons: [] };
-      expect(() => new CalculateCostService(invalidCouponConfig, mockRateConfig, mockDeliveryBatch))
+      expect(() => calculateBill(invalidCouponConfig, mockRateConfig, mockDeliveryBatch))
         .toThrow('Invalid coupon or rate configuration');
     });
 
     it('should throw error for invalid rate configuration', () => {
       const invalidRateConfig = { ...mockRateConfig, weight: -5 };
-      expect(() => new CalculateCostService(mockCouponConfig, invalidRateConfig, mockDeliveryBatch))
+      expect(() => calculateBill(mockCouponConfig, invalidRateConfig, mockDeliveryBatch))
         .toThrow('Invalid coupon or rate configuration');
     });
 
     it('should throw error for invalid delivery batch', () => {
       const invalidDeliveryBatch = { ...mockDeliveryBatch, packages: [{ ...mockDeliveryBatch.packages[0], weight: -5 }] };
-      expect(() => new CalculateCostService(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
+      expect(() => calculateBill(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
         .toThrow('Invalid delivery cost input');
     });
   });
 
   describe('calculateBill', () => {
     it('should calculate discount correctly for valid package with matching coupon', () => {
-      const service = new CalculateCostService(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
-      const result = service.calculateBill();
+      const result = calculateBill(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
       
       // Calculate expected cost manually
       const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
@@ -115,8 +115,7 @@ describe('CalculateCostService', () => {
         ]
       };
       
-      const service = new CalculateCostService(mockCouponConfig, mockRateConfig, batchWithoutCoupon);
-      const result = service.calculateBill();
+      const result = calculateBill(mockCouponConfig, mockRateConfig, batchWithoutCoupon);
       
       // Calculate expected cost manually
       const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175

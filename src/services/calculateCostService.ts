@@ -1,61 +1,57 @@
-import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
+import { CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
 import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
 import { DeliveryBatch, DeliveryBatchSchema, Package, PackageSchema, PackageWithCost } from '../schemas/package.schema';
 
-export class CalculateCostService {
-  private couponConfig: CouponConfig;
-  private rateConfig: RateConfig;
-  private deliveryBatch: DeliveryBatch;
+export function calculateBill(
+  couponConfig: CouponConfig,
+  rateConfig: RateConfig,
+  deliveryBatch: DeliveryBatch
+): PackageWithCost[] {
+  const couponValidation = CouponConfigSchema.safeParse(couponConfig);
+  const rateValidation = RateConfigSchema.safeParse(rateConfig);
 
-  constructor(
-    couponConfig: CouponConfig,
-    rateConfig: RateConfig,
-    deliveryBatch: DeliveryBatch
-  ) {
-    const couponValidation = CouponConfigSchema.safeParse(couponConfig);
-    const rateValidation = RateConfigSchema.safeParse(rateConfig);
-
-    if (!couponValidation.success || !rateValidation.success) {
-      throw new Error('Invalid coupon or rate configuration');
-    }
-
-    const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryBatch);
-
-    if (!deliveryValidation.success) {
-      throw new Error('Invalid delivery cost input');
-    }
-
-    this.couponConfig = couponConfig;
-    this.rateConfig = rateConfig;
-    this.deliveryBatch = deliveryBatch;
+  if (!couponValidation.success || !rateValidation.success) {
+    throw new Error('Invalid coupon or rate configuration');
   }
 
-  public calculateBill(): PackageWithCost[] {
-    const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
-      const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
-      const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
-      const costAfterDiscount = costBeforeDiscount - discount;
-      
-      const packageWithCost: Package = {
-        packageId: singlePackage.packageId,
-        weight: singlePackage.weight,
-        distance: singlePackage.distance,
-        offerCode: singlePackage.offerCode,
-        discount: discount,
-        totalCost: costAfterDiscount,
-      };
-      
-      // Validate the packageWithCost object against the schema
-      const packageValidation = PackageSchema.safeParse(packageWithCost);
-      if (!packageValidation.success) {
-        throw new Error('Invalid package with cost generated');
-      }
-      
-      return packageWithCost;
-    });
-    return discountedList;
+  const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryBatch);
+
+  if (!deliveryValidation.success) {
+    throw new Error('Invalid delivery cost input');
   }
 
+  const discountedList = deliveryBatch.packages.map((singlePackage) => 
+    calculateSingleBill(singlePackage, couponConfig, rateConfig, deliveryBatch.baseDeliveryCost)
+  );
+  
+  return discountedList;
+}
+
+export function calculateSingleBill(
+  singlePackage: Package,
+  couponConfig: CouponConfig,
+  rateConfig: RateConfig,
+  baseDeliveryCost: number
+): Package {
+  const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, rateConfig, baseDeliveryCost);
+  const discount = shouldDiscountApply(singlePackage, couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
+  const costAfterDiscount = costBeforeDiscount - discount;
+  
+  const packageWithCost: Package = {
+    packageId: singlePackage.packageId,
+    weight: singlePackage.weight,
+    distance: singlePackage.distance,
+    offerCode: singlePackage.offerCode,
+    discount: discount,
+    totalCost: costAfterDiscount,
+  };
+  
+  const packageValidation = PackageSchema.safeParse(packageWithCost);
+  if (!packageValidation.success) {
+    throw new Error('Invalid package with cost generated');
+  }
+  
+  return packageWithCost;
 }
 
 // pure function

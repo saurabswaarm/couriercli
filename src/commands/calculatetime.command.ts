@@ -5,9 +5,11 @@ import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
 import { calculateDeliveryTimes } from '../services/calculateTimeService';
+import { calculateSingleBill } from '../services/calculateCostService';
+import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
 
 export class CalculateTimeCommand {
-  private deliveryTimeInput: DeliveryBatch = {
+  private deliveryBatch: DeliveryBatch = {
     baseDeliveryCost: 0,
     numberOfPackages: 0,
     packages: []
@@ -28,7 +30,7 @@ export class CalculateTimeCommand {
   }
   
   public getDeliveryTimeInput(): DeliveryBatch {
-    return structuredClone(this.deliveryTimeInput);
+    return structuredClone(this.deliveryBatch);
   }
   
   public getFleetCapacity(): FleetCapacity {
@@ -37,16 +39,20 @@ export class CalculateTimeCommand {
 
   private calculateAndDisplayTimes(): void {
     try {
-      // Calculate delivery times using the function
-      const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryTimeInput, this.fleetCapacity);
+      const couponConfig = loadCouponConfig();
+      const rateConfig = loadRateConfig();
       
-      // Display results
+      const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
+      const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => {
+        return calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost);
+      })
+      
       console.log('\nDelivery Time Calculation Results:');
-      console.log('| Package ID | Delivery Time (hours) |');
-      console.log('|------------|-----------------------|');
+      console.log('| Package ID |  Discount | Total Cost | Delivery Time (hours) |');
+      console.log('|------------|-----------|------------|-----------------------|');
       
-      packagesWithDeliveryTime.forEach((packageWithDeliveryTime) => {
-        hasDeliveryTime(packageWithDeliveryTime) && hasDiscountAndTotalCost(packageWithDeliveryTime) && console.log(`| ${packageWithDeliveryTime.packageId.padEnd(10)} | ${packageWithDeliveryTime.discount.toFixed(0).padEnd(10)} | ${packageWithDeliveryTime.totalCost.toFixed(0).padEnd(10)} |`);
+      packagesWithCostAndDeliveryTime.forEach((packageWithCostAndDeliveryTime) => {
+        hasDeliveryTime(packageWithCostAndDeliveryTime) && hasDiscountAndTotalCost(packageWithCostAndDeliveryTime) && console.log(`| ${packageWithCostAndDeliveryTime.packageId.padEnd(10)} | ${packageWithCostAndDeliveryTime.discount.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.totalCost.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.deliveryTime.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating delivery times:', error);
@@ -65,8 +71,8 @@ export class CalculateTimeCommand {
       ]);
 
       const parsedInput = processInitialDetails(initialAnswer.initialDetails);
-      this.deliveryTimeInput.baseDeliveryCost = parsedInput.baseDeliveryCost;
-      this.deliveryTimeInput.numberOfPackages = parsedInput.numberOfPackages;
+      this.deliveryBatch.baseDeliveryCost = parsedInput.baseDeliveryCost;
+      this.deliveryBatch.numberOfPackages = parsedInput.numberOfPackages;
     } catch (error) {
       console.error('Error:', error);
       throw error;
@@ -74,7 +80,7 @@ export class CalculateTimeCommand {
   }
 
   private async promptPackageDetails(): Promise<void> {
-    for (let i = 0; i < this.deliveryTimeInput.numberOfPackages; i++) {
+    for (let i = 0; i < this.deliveryBatch.numberOfPackages; i++) {
       await this.promptSinglePackageDetails(i + 1);
     }
     this.displayPackageSummary();
@@ -92,7 +98,7 @@ export class CalculateTimeCommand {
       ]);
 
       const packageData = processPackageDetails(packageAnswer.packageDetails);
-      this.deliveryTimeInput.packages.push(packageData);
+      this.deliveryBatch.packages.push(packageData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error('Validation error:', error.format());
@@ -128,8 +134,8 @@ export class CalculateTimeCommand {
 
   private displayPackageSummary(): void {
     console.log('\nPackage Summary:');
-    console.log(`Base Delivery Cost: ${this.deliveryTimeInput.baseDeliveryCost}`);
-    console.log(`Number of Packages: ${this.deliveryTimeInput.packages.length}`);
+    console.log(`Base Delivery Cost: ${this.deliveryBatch.baseDeliveryCost}`);
+    console.log(`Number of Packages: ${this.deliveryBatch.packages.length}`);
 
     console.log('\nPackage Details:');
 
@@ -141,7 +147,7 @@ export class CalculateTimeCommand {
     console.log(separator);
 
     // Display each package in a table row
-    this.deliveryTimeInput.packages.forEach((pkg) => {
+    this.deliveryBatch.packages.forEach((pkg) => {
       const offerCode = pkg.offerCode || 'N/A';
       console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
     });
