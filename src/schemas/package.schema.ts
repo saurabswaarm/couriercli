@@ -5,6 +5,9 @@ export const PackageSchema = z.object({
   weight: z.number().positive('Weight must be a positive number'),
   distance: z.number().positive('Distance must be a positive number'),
   offerCode: z.string().optional(),
+  discount: z.number().min(0, 'Discount must be a non-negative number').optional(),
+  totalCost: z.number().min(0, 'Total cost must be a non-negative number').optional(),
+  deliveryTime: z.number().min(0.01, 'Delivery time must be a non-zero non-negative number').optional(),
 });
 
 

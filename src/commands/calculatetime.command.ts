@@ -2,7 +2,6 @@ import inquirer from 'inquirer';
 import { z } from 'zod';
 import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
-import { Bill } from '../schemas/bill.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
 import { calculateDeliveryTimes } from '../services/calculateTimeService';

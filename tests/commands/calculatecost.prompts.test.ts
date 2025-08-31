@@ -10,7 +10,7 @@ describe('CLI entrypoint',
         beforeEach(() => {
             console.log("Mock config is loaded")
             // Mock config loader functions
-            jest.mock('./utils/configLoader', () => ({
+            jest.mock('../../src/utils/configLoader', () => ({
                 loadCouponConfig: jest.fn().mockReturnValue({
                     coupons: [
                         {

@@ -5,25 +5,37 @@ import { FleetCapacity } from '../schemas/fleet.schema';
 describe('CalculateTimeService', () => {
   const mockDeliveryBatch: DeliveryBatch = {
     baseDeliveryCost: 100,
-    numberOfPackages: 3,
+    numberOfPackages: 5,
     packages: [
       {
         packageId: 'PKG1',
-        weight: 150,
+        weight: 50,
         distance: 30,
         offerCode: 'OFR001'
       },
       {
         packageId: 'PKG2',
-        weight: 100,
-        distance: 20,
-        offerCode: 'OFR002'
+        weight: 75,
+        distance: 125,
+        offerCode: 'OFFR0008'
       },
       {
         packageId: 'PKG3',
-        weight: 150,
-        distance: 50,
-        offerCode: 'OFR003'
+        weight: 175,
+        distance: 100,
+        offerCode: 'OFFR003'
+      },
+      {
+        packageId: 'PKG4',
+        weight: 110,
+        distance: 60,
+        offerCode: 'OFFR002'
+      },
+      {
+        packageId: 'PKG5',
+        weight: 155,
+        distance: 95,
+        offerCode: 'NA'
       }
     ]
   };
@@ -39,7 +51,7 @@ describe('CalculateTimeService', () => {
       const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
       
       // Should have results for all packages
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(5);
       
       // All packages should have delivery times
       result.forEach((bill: any) => {
@@ -52,7 +64,7 @@ describe('CalculateTimeService', () => {
       const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
       
       // Check that all packages have been assigned delivery times
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(5);
       
       // Each delivery time should be positive
       result.forEach((bill: any) => {

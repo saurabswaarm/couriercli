@@ -2,7 +2,6 @@ import { CalculateCostService, calculateCostBeforeDiscount, shouldDiscountApply,
 import { CouponConfig, ConditionParam, ConditionType } from '../schemas/coupon.schema';
 import { RateConfig } from '../schemas/rate.schema';
 import { DeliveryBatch, Package } from '../schemas/package.schema';
-import { Bill } from '../schemas/bill.schema';
 
 // Mock process.exit to prevent tests from exiting
 jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
@@ -91,11 +90,13 @@ describe('CalculateCostService', () => {
       const discountAmount = costBeforeDiscount * 10 / 100; // 175 * 10 / 100 = 17.5
       const expectedTotalCost = costBeforeDiscount - discountAmount; // 175 - 17.5 = 157.5
       
-      const expectedBill: Bill = {
+      const expectedBill: Package = {
         packageId: 'PKG1',
+        weight: 5,
+        distance: 5,
+        offerCode: 'OFR001',
         discount: discountAmount,
-        totalCost: expectedTotalCost,
-        deliveryTime: 0.01
+        totalCost: expectedTotalCost
       };
       
       expect(result).toEqual([expectedBill]);
@@ -120,11 +121,12 @@ describe('CalculateCostService', () => {
       // Calculate expected cost manually
       const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
       
-      const expectedBill: Bill = {
+      const expectedBill: Package = {
         packageId: 'PKG2',
+        weight: 5,
+        distance: 5,
         discount: 0, // No discount applied
-        totalCost: costBeforeDiscount,
-        deliveryTime: 0.01
+        totalCost: costBeforeDiscount
       };
       
       expect(result).toEqual([expectedBill]);

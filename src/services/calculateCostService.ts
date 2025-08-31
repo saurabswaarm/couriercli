@@ -1,7 +1,6 @@
 import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
 import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
-import { DeliveryBatch, DeliveryBatchSchema, Package } from '../schemas/package.schema';
-import { Bill, BillSchema } from '../schemas/bill.schema';
+import { DeliveryBatch, DeliveryBatchSchema, Package, PackageSchema } from '../schemas/package.schema';
 
 export class CalculateCostService {
   private couponConfig: CouponConfig;
@@ -31,21 +30,23 @@ export class CalculateCostService {
     this.deliveryBatch = deliveryBatch;
   }
 
-  public calculateBill(): Bill[] {
+  public calculateBill(): Package[] {
     const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
       const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
       const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
       const costAfterDiscount = costBeforeDiscount - discount;
       
-      const bill: Bill = {
+      const bill: Package = {
         packageId: singlePackage.packageId,
+        weight: singlePackage.weight,
+        distance: singlePackage.distance,
+        offerCode: singlePackage.offerCode,
         discount: discount,
         totalCost: costAfterDiscount,
-        deliveryTime: 0.01 // Delivery time is calculated separately, using minimum valid value
       };
       
       // Validate the bill object against the schema
-      const billValidation = BillSchema.safeParse(bill);
+      const billValidation = PackageSchema.safeParse(bill);
       if (!billValidation.success) {
         throw new Error('Invalid bill generated');
       }
