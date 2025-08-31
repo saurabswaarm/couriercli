@@ -77,7 +77,7 @@ describe('CalculateCostService', () => {
     it('should throw error for invalid delivery batch', () => {
       const invalidDeliveryBatch = { ...mockDeliveryBatch, packages: [{ ...mockDeliveryBatch.packages[0], weight: -5 }] };
       expect(() => calculateBill(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
-        .toThrow('Invalid delivery cost input');
+        .toThrow('Invalid package with cost generated');
     });
   });
 

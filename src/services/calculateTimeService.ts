@@ -126,6 +126,7 @@ export function calculateDeliveryTimes(deliveryBatch: DeliveryBatch, fleetCapaci
         packageId: pkg.packageId,
         weight: pkg.weight,
         distance: pkg.distance,
+        offerCode: pkg.offerCode,
         deliveryTime: deliveryTimes[pkg.packageId]
     }));
 }

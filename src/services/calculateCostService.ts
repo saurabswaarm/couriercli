@@ -1,25 +1,13 @@
-import { CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
-import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
-import { DeliveryBatch, DeliveryBatchSchema, Package, PackageSchema, PackageWithCost } from '../schemas/package.schema';
+import { CouponConfig, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
+import { RateConfig } from '../schemas/rate.schema';
+import { DeliveryBatch, Package, PackageSchema, PackageWithCost } from '../schemas/package.schema';
+import { validateConfigurations} from '../utils/configValidationUtils';
 
 export function calculateBill(
   couponConfig: CouponConfig,
   rateConfig: RateConfig,
   deliveryBatch: DeliveryBatch
 ): PackageWithCost[] {
-  const couponValidation = CouponConfigSchema.safeParse(couponConfig);
-  const rateValidation = RateConfigSchema.safeParse(rateConfig);
-
-  if (!couponValidation.success || !rateValidation.success) {
-    throw new Error('Invalid coupon or rate configuration');
-  }
-
-  const deliveryValidation = DeliveryBatchSchema.safeParse(deliveryBatch);
-
-  if (!deliveryValidation.success) {
-    throw new Error('Invalid delivery cost input');
-  }
-
   const discountedList = deliveryBatch.packages.map((singlePackage) => 
     calculateSingleBill(singlePackage, couponConfig, rateConfig, deliveryBatch.baseDeliveryCost)
   );
@@ -33,6 +21,7 @@ export function calculateSingleBill(
   rateConfig: RateConfig,
   baseDeliveryCost: number
 ): Package {
+  validateConfigurations(couponConfig, rateConfig);
   const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, rateConfig, baseDeliveryCost);
   const discount = shouldDiscountApply(singlePackage, couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
   const costAfterDiscount = costBeforeDiscount - discount;

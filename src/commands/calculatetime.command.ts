@@ -42,10 +42,14 @@ export class CalculateTimeCommand {
       const rateConfig = loadRateConfig();
 
       const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
-      const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => ({
-        ...calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost),
-        deliveryTime: packageWithDeliveryTime.deliveryTime,
-      }))
+      const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => {
+        const singleBill = calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost);
+        console.log('singlebill', singleBill);
+        return {
+          ...singleBill,
+          deliveryTime: packageWithDeliveryTime.deliveryTime,
+        };
+      });
 
       packagesWithCostAndDeliveryTime.forEach((packageWithCostAndDeliveryTime) => {
         if (hasDiscountAndTotalCost(packageWithCostAndDeliveryTime) && hasDeliveryTime(packageWithCostAndDeliveryTime)) {
