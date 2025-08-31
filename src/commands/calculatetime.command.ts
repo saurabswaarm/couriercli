@@ -25,7 +25,6 @@ export class CalculateTimeCommand {
     await this.promptInitialDetails();
     await this.promptPackageDetails();
     await this.promptFleetDetails();
-    this.displaySummary();
     this.calculateAndDisplayTimes();
   }
   
@@ -43,16 +42,18 @@ export class CalculateTimeCommand {
       const rateConfig = loadRateConfig();
       
       const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
-      const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => {
-        return calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost);
-      })
+      const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => ({
+        ...calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost),
+        deliveryTime: packageWithDeliveryTime.deliveryTime,
+      }))
       
       console.log('\nDelivery Time Calculation Results:');
       console.log('| Package ID |  Discount | Total Cost | Delivery Time (hours) |');
       console.log('|------------|-----------|------------|-----------------------|');
       
       packagesWithCostAndDeliveryTime.forEach((packageWithCostAndDeliveryTime) => {
-        hasDeliveryTime(packageWithCostAndDeliveryTime) && hasDiscountAndTotalCost(packageWithCostAndDeliveryTime) && console.log(`| ${packageWithCostAndDeliveryTime.packageId.padEnd(10)} | ${packageWithCostAndDeliveryTime.discount.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.totalCost.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.deliveryTime.toFixed(0).padEnd(10)} |`);
+        // @ts-ignore
+        console.log(`| ${packageWithCostAndDeliveryTime.packageId.padEnd(10)} | ${packageWithCostAndDeliveryTime.discount.toFixed(0).padEnd(9)} | ${packageWithCostAndDeliveryTime.totalCost.toFixed(0).padEnd(10)} | ${packageWithCostAndDeliveryTime.deliveryTime.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating delivery times:', error);
@@ -83,7 +84,6 @@ export class CalculateTimeCommand {
     for (let i = 0; i < this.deliveryBatch.numberOfPackages; i++) {
       await this.promptSinglePackageDetails(i + 1);
     }
-    this.displayPackageSummary();
   }
 
   private async promptSinglePackageDetails(packageNumber: number): Promise<void> {
@@ -130,36 +130,6 @@ export class CalculateTimeCommand {
       }
       throw error;
     }
-  }
-
-  private displayPackageSummary(): void {
-    console.log('\nPackage Summary:');
-    console.log(`Base Delivery Cost: ${this.deliveryBatch.baseDeliveryCost}`);
-    console.log(`Number of Packages: ${this.deliveryBatch.packages.length}`);
-
-    console.log('\nPackage Details:');
-
-    // Create table header
-    const header = '| Package ID | Weight (kg) | Distance (km) | Offer Code |';
-    const separator = '|------------|-------------|---------------|------------|';
-
-    console.log(header);
-    console.log(separator);
-
-    // Display each package in a table row
-    this.deliveryBatch.packages.forEach((pkg) => {
-      const offerCode = pkg.offerCode || 'N/A';
-      console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
-    });
-  }
-  
-  private displaySummary(): void {
-    this.displayPackageSummary();
-    
-    console.log('\nFleet Details:');
-    console.log(`Number of Vehicles: ${this.fleetCapacity.numberOfVehicles}`);
-    console.log(`Max Speed: ${this.fleetCapacity.maxSpeed} km/hr`);
-    console.log(`Max Carriable Weight: ${this.fleetCapacity.maxCarriableWeight} kg`);
   }
 }
 

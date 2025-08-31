@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Package, PackageSchema } from './package.schema';
+import { PackageSchema } from './package.schema';
 
 export const ShipmentSchema = z.object({
   packages: z.array(PackageSchema),

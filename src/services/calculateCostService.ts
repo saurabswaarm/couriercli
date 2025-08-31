@@ -54,12 +54,10 @@ export function calculateSingleBill(
   return packageWithCost;
 }
 
-// pure function
 export function calculateCostBeforeDiscount(singlePackage: Package, rateConfig: RateConfig, baseDeliveryCost: number): number {
     return baseDeliveryCost + rateConfig.weight * singlePackage.weight + rateConfig.distance * singlePackage.distance;
 }
 
-// pure function
 export function shouldDiscountApply(singlePackage: Package, coupons: Coupon[]): boolean {
     const coupon = coupons.find((coupon) => coupon.code === singlePackage.offerCode);
 
@@ -85,7 +83,6 @@ export function shouldDiscountApply(singlePackage: Package, coupons: Coupon[]): 
     return allConditionsMet;
 }
 
-// pure function
 export function calculateDiscount(costBeforeDiscount: number, coupon?: Coupon): number {
     if (!coupon) {
       return 0;
