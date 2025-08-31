@@ -1,6 +1,34 @@
 import run from 'inquirer-test';
 import { ENTER, DOWN } from 'inquirer-test';
 
+// Mock config loader functions
+jest.mock('./utils/configLoader', () => ({
+  loadCouponConfig: jest.fn().mockReturnValue({
+    coupons: [
+      {
+        code: 'OFR001',
+        pattern: '^OFR[0-9]{3}$',
+        discount: 10,
+        conditions: [
+          {
+            param: 'weight',
+            type: 'lessThan',
+            max: 150,
+            unit: 'kg'
+          }
+        ]
+      }
+    ],
+    validationRules: {
+      combinedCoupons: false
+    }
+  }),
+  loadRateConfig: jest.fn().mockReturnValue({
+    weight: 10,
+    distance: 5
+  })
+}));
+
 
             const askingForPackageDetailsString = [ "Enter details for package", "pkg_id pkg_weight_in_kg distance_in_km"];
 describe('CLI entrypoint',

@@ -1,6 +1,41 @@
 import { CalculateCostCommand } from './calculatecost.command';
 import inquirer from 'inquirer';
 
+// Mock config loader functions
+jest.mock('../utils/configLoader', () => ({
+  loadCouponConfig: jest.fn().mockReturnValue({
+    coupons: [
+      {
+        code: 'OFR001',
+        pattern: '^OFR[0-9]{3}$',
+        discount: 10,
+        conditions: [
+          {
+            param: 'weight',
+            type: 'lessThan',
+            max: 10,
+            unit: 'kg'
+          },
+          {
+            param: 'distance',
+            type: 'between',
+            min: 0,
+            max: 20,
+            unit: 'km'
+          }
+        ]
+      }
+    ],
+    validationRules: {
+      combinedCoupons: false
+    }
+  }),
+  loadRateConfig: jest.fn().mockReturnValue({
+    weight: 10,
+    distance: 5
+  })
+}));
+
 // Mock inquirer.prompt to control user input
 jest.mock('inquirer', () => ({
   __esModule: true,

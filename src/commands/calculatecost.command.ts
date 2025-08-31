@@ -1,6 +1,9 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
 import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
+import { CalculateCostService } from '../services/calculateCostService';
+import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
+import { Bill } from '../schemas/bill.schema';
 
 export class CalculateCostCommand {
   private deliveryCostInput: DeliveryBatch = {
@@ -13,6 +16,7 @@ export class CalculateCostCommand {
     await this.promptInitialDetails();
     await this.promptPackageDetails();
     this.displaySummary();
+    this.calculateAndDisplayCosts();
   }
   
   public getDeliveryCostInput(): DeliveryBatch {
@@ -88,6 +92,31 @@ export class CalculateCostCommand {
       const offerCode = pkg.offerCode || 'N/A';
       console.log(`| ${pkg.packageId.padEnd(10)} | ${pkg.weight.toString().padEnd(11)} | ${pkg.distance.toString().padEnd(13)} | ${offerCode.padEnd(10)} |`);
     });
+  }
+
+  private calculateAndDisplayCosts(): void {
+    try {
+      // Load configurations
+      const couponConfig = loadCouponConfig();
+      const rateConfig = loadRateConfig();
+      
+      // Create service instance
+      const calculateCostService = new CalculateCostService(couponConfig, rateConfig, this.deliveryCostInput);
+      
+      // Calculate bills
+      const bills = calculateCostService.calculateBill();
+      
+      // Display results
+      console.log('\nCost Calculation Results:');
+      console.log('| Package ID | Discount | Total Cost |');
+      console.log('|------------|----------|------------|');
+      
+      bills.forEach(bill => {
+        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(2).padEnd(8)} | ${bill.totalCost.toFixed(2).padEnd(10)} |`);
+      });
+    } catch (error) {
+      console.error('Error calculating costs:', error);
+    }
   }
 }
 
