@@ -84,12 +84,9 @@ describe('CalculateCostService', () => {
   describe('calculateBill', () => {
     it('should calculate discount correctly for valid package with matching coupon', () => {
       const result = calculateBill(mockCouponConfig, mockRateConfig, mockDeliveryBatch);
-      
-      // Calculate expected cost manually
-      const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
-      const discountAmount = costBeforeDiscount * 10 / 100; // 175 * 10 / 100 = 17.5
-      const expectedTotalCost = costBeforeDiscount - discountAmount; // 175 - 17.5 = 157.5
-      
+      const costBeforeDiscount = 100 + (10 * 5) + (5 * 5);
+      const discountAmount = costBeforeDiscount * 10 / 100;
+      const expectedTotalCost = costBeforeDiscount - discountAmount;
       const expectedBill: Package = {
         packageId: 'PKG1',
         weight: 5,
@@ -116,10 +113,7 @@ describe('CalculateCostService', () => {
       };
       
       const result = calculateBill(mockCouponConfig, mockRateConfig, batchWithoutCoupon);
-      
-      // Calculate expected cost manually
-      const costBeforeDiscount = 100 + (10 * 5) + (5 * 5); // base + weight*rate + distance*rate = 100 + 50 + 25 = 175
-      
+      const costBeforeDiscount = 100 + (10 * 5) + (5 * 5);
       const expectedBill: Package = {
         packageId: 'PKG2',
         weight: 5,
@@ -150,7 +144,7 @@ describe('CalculateCostService', () => {
     it('should return true when all conditions are met', () => {
       const mockPackage: Package = {
         packageId: 'PKG1',
-        weight: 5, // less than 10
+        weight: 5,
         distance: 10, // between 0 and 20
         offerCode: 'OFR001'
       };

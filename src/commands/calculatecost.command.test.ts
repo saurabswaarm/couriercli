@@ -65,11 +65,10 @@ describe('CalculateCostCommand', () => {
 
   describe('execute', () => {
     it('should execute the command successfully with valid inputs', async () => {
-      // Mock the inquirer responses
       inquirerPromptSpy
-        .mockResolvedValueOnce({ initialDetails: '100 2' }) // First prompt for initial details
-        .mockResolvedValueOnce({ packageDetails: 'PKG1 5 5 OFR001' }) // First package
-        .mockResolvedValueOnce({ packageDetails: 'PKG2 10 10 OFR002' }); // Second package
+        .mockResolvedValueOnce({ initialDetails: '100 2' })
+        .mockResolvedValueOnce({ packageDetails: 'PKG1 5 5 OFR001' })
+        .mockResolvedValueOnce({ packageDetails: 'PKG2 10 10 OFR002' });
 
       await calculateCostCommand.execute();
 
@@ -80,38 +79,24 @@ describe('CalculateCostCommand', () => {
   describe('promptInitialDetails', () => {
     it('should set baseDeliveryCost and numberOfPackages correctly', async () => {
       inquirerPromptSpy.mockResolvedValueOnce({ initialDetails: '100 3' });
-
       await (calculateCostCommand as any).promptInitialDetails();
-
       expect((calculateCostCommand as any).deliveryCostInput.baseDeliveryCost).toBe(100);
       expect((calculateCostCommand as any).deliveryCostInput.numberOfPackages).toBe(3);
     });
 
     it('should throw error for invalid input', async () => {
-      // Mock the inquirer response with invalid input
       inquirerPromptSpy.mockResolvedValueOnce({ initialDetails: 'invalid' });
-      
-      // Expect the method to throw an error
       await expect((calculateCostCommand as any).promptInitialDetails()).rejects.toThrow();
-      
-      // Verify that inquirer.prompt was called
       expect(inquirerPromptSpy).toHaveBeenCalled();
     });
   });
 
   describe('promptPackageDetails', () => {
     it('should call promptSinglePackageDetails for each package', async () => {
-      // Set the numberOfPackages
       (calculateCostCommand as any).deliveryCostInput.numberOfPackages = 2;
-      
-      // Mock the promptSinglePackageDetails method
       const promptSinglePackageDetailsSpy = jest.spyOn(calculateCostCommand as any, 'promptSinglePackageDetails')
         .mockResolvedValue(undefined);
-
-      // Call the method
       await (calculateCostCommand as any).promptPackageDetails();
-
-      // Verify that promptSinglePackageDetails was called for each package
       expect(promptSinglePackageDetailsSpy).toHaveBeenCalledTimes(2);
       expect(promptSinglePackageDetailsSpy).toHaveBeenCalledWith(1);
       expect(promptSinglePackageDetailsSpy).toHaveBeenCalledWith(2);
@@ -120,16 +105,9 @@ describe('CalculateCostCommand', () => {
 
   describe('promptSinglePackageDetails', () => {
     it('should add package to packages array', async () => {
-      // Mock the inquirer response with valid input
       inquirerPromptSpy.mockResolvedValueOnce({ packageDetails: 'PKG1 5 5 OFR001' });
-      
-      // Initialize the packages array
       (calculateCostCommand as any).deliveryCostInput.packages = [];
-
-      // Call the method
       await (calculateCostCommand as any).promptSinglePackageDetails(1);
-
-      // Verify that the package was added to the array
       expect((calculateCostCommand as any).deliveryCostInput.packages).toHaveLength(1);
       expect((calculateCostCommand as any).deliveryCostInput.packages[0]).toEqual({
         packageId: 'PKG1',
@@ -140,16 +118,9 @@ describe('CalculateCostCommand', () => {
     });
 
     it('should throw error for invalid input', async () => {
-      // Mock the inquirer response with invalid input
       inquirerPromptSpy.mockResolvedValueOnce({ packageDetails: '' });
-      
-      // Initialize the packages array
       (calculateCostCommand as any).deliveryCostInput.packages = [];
-
-      // Expect the method to throw an error
       await expect((calculateCostCommand as any).promptSinglePackageDetails(1)).rejects.toThrow();
-      
-      // Verify that inquirer.prompt was called
       expect(inquirerPromptSpy).toHaveBeenCalled();
     });
   });

@@ -49,11 +49,7 @@ describe('CalculateTimeService', () => {
   describe('calculateDeliveryTimes', () => {
     it('should calculate delivery times for all packages', () => {
       const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
-      
-      // Should have results for all packages
       expect(result).toHaveLength(5);
-      
-      // All packages should have delivery times
       result.forEach((packageWithDeliveryTime: any) => {
         expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
         expect(packageWithDeliveryTime.packageId).toBeDefined();
@@ -62,11 +58,7 @@ describe('CalculateTimeService', () => {
 
     it('should assign delivery times based on vehicle capacity constraints', () => {
       const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
-      
-      // Check that all packages have been assigned delivery times
       expect(result).toHaveLength(5);
-      
-      // Each delivery time should be positive
       result.forEach((packageWithDeliveryTime: any) => {
         expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
       });
