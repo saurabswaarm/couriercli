@@ -8,6 +8,7 @@ const askingForPackageDetailsString = ["Enter details for package", "pkg_id pkg_
 describe('CLI entrypoint',
     () => {
         beforeEach(() => {
+            console.log("Mock config is loaded")
             // Mock config loader functions
             jest.mock('./utils/configLoader', () => ({
                 loadCouponConfig: jest.fn().mockReturnValue({
@@ -128,9 +129,9 @@ describe('CLI entrypoint',
 
             const result = await run(['dist/index.js'], [ENTER, ENTER, "100 " + packageCount, ...promptArray.map(p => [ENTER, p]).flat()]);
             const expectedStrings = [
-                "PKG1", "0", "175",
-                "PKG2", "0", "275",
-                "PKG", "35", "665"
+                `| ${"PKG1".padEnd(10)} | ${"0".padEnd(10)} | ${"175".padEnd(10)} |`,
+                `| ${"PKG2".padEnd(10)} | ${"0".padEnd(10)} | ${"275".padEnd(10)} |`,
+                `| ${"PKG3".padEnd(10)} | ${"35".padEnd(10)} | ${"665".padEnd(10)} |`,
             ];
             expectedStrings.forEach(str => expect(result).toContain(str));
 

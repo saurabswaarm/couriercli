@@ -112,7 +112,7 @@ export class CalculateCostCommand {
       console.log('|------------|----------|------------|');
       
       bills.forEach(bill => {
-        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(2).padEnd(8)} | ${bill.totalCost.toFixed(2).padEnd(10)} |`);
+        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating costs:', error);

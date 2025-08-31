@@ -34,8 +34,8 @@ export class CalculateCostService {
   public calculateBill(): Bill[] {
     const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
       const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
-      const discount = calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode));
-      const costAfterDiscount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? costBeforeDiscount - discount : costBeforeDiscount;
+      const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;
+      const costAfterDiscount = costBeforeDiscount - discount;
       
       const bill: Bill = {
         packageId: singlePackage.packageId,
