@@ -3,55 +3,64 @@
     {
       "code": "OFR001",
       "pattern": "^OFR[0-9]{3}$",
-      "discount": 25,
-      "conditions": [{
-        "param": "weight",
-        "type": "between",
-        "min": 200,
-        "max": 300,
-        "unit": "kg"
-      },
-      {
-        "param": "distance",
-        "type": "between",
-        "min": 5,
-        "max": 20,
-        "unit": "km"
-      }]
+      "discount": 10,
+      "conditions": [
+        {
+          "param": "distance",
+          "type": "lessThan",
+          "max": 200,
+          "unit": "km"
+        },
+        {
+          "param": "weight",
+          "type": "between",
+          "min": 70,
+          "max": 200,
+          "unit": "kg"
+        }
+      ]
     },
     {
       "code": "OFR002",
       "pattern": "^OFR[0-9]{3}$",
-      "discount": 50,
-      "conditions": [{
-        "param": "weight",
-        "type": "lessThan",
-        "max": 200,
-        "unit": "kg"
-      },
-      {
-        "param": "distance",
-        "type": "lessThan",
-        "max": 5,
-        "unit": "km"
-      }]
+      "discount": 7,
+      "conditions": [
+        {
+          "param": "distance",
+          "type": "between",
+          "min": 50,
+          "max": 150,
+          "unit": "km"
+        },
+        {
+          "param": "weight",
+          "type": "between",
+          "min": 100,
+          "max": 250,
+          "unit": "kg"
+        }
+      ]
     },
     {
       "code": "OFR003",
       "pattern": "^OFR[0-9]{3}$",
-      "discount": 10,
-      "conditions": [{
-        "param": "weight",
-        "type": "greaterThan",
-        "min": 300,
-        "unit": "kg"
-      },
-      {
-        "param": "distance",
-        "type": "greaterThan",
-        "min": 20,
-        "unit": "km"
-      }]
+      "discount": 5,
+      "conditions": [
+        {
+          "param": "distance",
+          "type": "between",
+          "min": 50,
+          "max": 250,
+          "unit": "km"
+        },
+        {
+          "param": "weight",
+          "type": "between",
+          "min": 10,
+          "max": 150,
+          "unit": "kg"
+        }
+      ]
     }
   ],
   "validationRules": {
