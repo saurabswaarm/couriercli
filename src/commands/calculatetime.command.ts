@@ -2,8 +2,10 @@ import inquirer from 'inquirer';
 import { z } from 'zod';
 import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
+import { Bill } from '../schemas/bill.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
+import { calculateDeliveryTimes } from '../services/calculateTimeService';
 
 export class CalculateTimeCommand {
   private deliveryTimeInput: DeliveryBatch = {
@@ -23,8 +25,7 @@ export class CalculateTimeCommand {
     await this.promptPackageDetails();
     await this.promptFleetDetails();
     this.displaySummary();
-    // TODO: Implement time calculation logic
-    console.log('Time calculation logic will be implemented here');
+    this.calculateAndDisplayTimes();
   }
   
   public getDeliveryTimeInput(): DeliveryBatch {
@@ -33,6 +34,24 @@ export class CalculateTimeCommand {
   
   public getFleetCapacity(): FleetCapacity {
     return structuredClone(this.fleetCapacity);
+  }
+
+  private calculateAndDisplayTimes(): void {
+    try {
+      // Calculate delivery times using the function
+      const bills = calculateDeliveryTimes(this.deliveryTimeInput, this.fleetCapacity);
+      
+      // Display results
+      console.log('\nDelivery Time Calculation Results:');
+      console.log('| Package ID | Delivery Time (hours) |');
+      console.log('|------------|-----------------------|');
+      
+      bills.forEach((bill: any) => {
+        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.deliveryTime.toFixed(2).padEnd(21)} |`);
+      });
+    } catch (error) {
+      console.error('Error calculating delivery times:', error);
+    }
   }
 
   private async promptInitialDetails(): Promise<void> {

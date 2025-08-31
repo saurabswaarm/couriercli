@@ -40,7 +40,8 @@ export class CalculateCostService {
       const bill: Bill = {
         packageId: singlePackage.packageId,
         discount: discount,
-        totalCost: costAfterDiscount
+        totalCost: costAfterDiscount,
+        deliveryTime: 0.01 // Delivery time is calculated separately, using minimum valid value
       };
       
       // Validate the bill object against the schema

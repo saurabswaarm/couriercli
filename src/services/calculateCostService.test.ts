@@ -94,7 +94,8 @@ describe('CalculateCostService', () => {
       const expectedBill: Bill = {
         packageId: 'PKG1',
         discount: discountAmount,
-        totalCost: expectedTotalCost
+        totalCost: expectedTotalCost,
+        deliveryTime: 0.01
       };
       
       expect(result).toEqual([expectedBill]);
@@ -122,7 +123,8 @@ describe('CalculateCostService', () => {
       const expectedBill: Bill = {
         packageId: 'PKG2',
         discount: 0, // No discount applied
-        totalCost: costBeforeDiscount
+        totalCost: costBeforeDiscount,
+        deliveryTime: 0.01
       };
       
       expect(result).toEqual([expectedBill]);
