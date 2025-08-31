@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
+import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema, hasDeliveryTime, hasDiscountAndTotalCost} from '../schemas/package.schema';
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
@@ -45,8 +45,8 @@ export class CalculateTimeCommand {
       console.log('| Package ID | Delivery Time (hours) |');
       console.log('|------------|-----------------------|');
       
-      bills.forEach((bill: any) => {
-        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.deliveryTime.toFixed(2).padEnd(21)} |`);
+      bills.forEach((bill) => {
+        hasDeliveryTime(bill) && hasDiscountAndTotalCost(bill) && console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating delivery times:', error);

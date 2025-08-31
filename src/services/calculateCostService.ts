@@ -1,6 +1,6 @@
 import { ConditionType, CouponConfig, CouponConfigSchema, isLessThanCondition, isGreaterThanCondition, isBetweenCondition, Coupon } from '../schemas/coupon.schema';
 import { RateConfig, RateConfigSchema } from '../schemas/rate.schema';
-import { DeliveryBatch, DeliveryBatchSchema, Package, PackageSchema } from '../schemas/package.schema';
+import { DeliveryBatch, DeliveryBatchSchema, Package, PackageSchema, PackageWithCost } from '../schemas/package.schema';
 
 export class CalculateCostService {
   private couponConfig: CouponConfig;
@@ -30,7 +30,7 @@ export class CalculateCostService {
     this.deliveryBatch = deliveryBatch;
   }
 
-  public calculateBill(): Package[] {
+  public calculateBill(): PackageWithCost[] {
     const discountedList = this.deliveryBatch.packages.map((singlePackage) => {
       const costBeforeDiscount = calculateCostBeforeDiscount(singlePackage, this.rateConfig, this.deliveryBatch.baseDeliveryCost);
       const discount = shouldDiscountApply(singlePackage, this.couponConfig.coupons) ? calculateDiscount(costBeforeDiscount, this.couponConfig.coupons.find(coupon => coupon.code === singlePackage.offerCode)) : 0;

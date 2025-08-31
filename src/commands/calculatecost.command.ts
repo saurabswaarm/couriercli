@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema} from '../schemas/package.schema';
+import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema, hasDiscountAndTotalCost} from '../schemas/package.schema';
 import { CalculateCostService } from '../services/calculateCostService';
 import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
 import { validateInitialDetails, validatePackageDetails } from '../utils/validationUtils';
@@ -113,8 +113,7 @@ export class CalculateCostCommand {
       console.log('|------------|----------|------------|');
       
       bills.forEach(bill => {
-        // @ts-ignore
-        console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
+        hasDiscountAndTotalCost(bill) && console.log(`| ${bill.packageId.padEnd(10)} | ${bill.discount.toFixed(0).padEnd(10)} | ${bill.totalCost.toFixed(0).padEnd(10)} |`);
       });
     } catch (error) {
       console.error('Error calculating costs:', error);
