@@ -56,7 +56,7 @@ export class CalculateTimeCommand {
           const discount = packageWithCostAndDeliveryTime.discount
           const totalCost = packageWithCostAndDeliveryTime.totalCost
           const deliveryTime = packageWithCostAndDeliveryTime.deliveryTime
-          console.log(`${packageWithCostAndDeliveryTime.packageId} ${discount.toFixed(0)} ${totalCost.toFixed(0)} ${deliveryTime.toFixed(0)}`);
+          console.log(`${packageWithCostAndDeliveryTime.packageId} ${discount.toFixed(0)} ${totalCost.toFixed(0)} ${deliveryTime.toFixed(2)}`);
         }
       });
     } catch (error) {
