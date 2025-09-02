@@ -16,42 +16,42 @@ export function calculateDeliveryTimes(deliveryBatch: DeliveryBatch, fleetCapaci
     }
 
     function createAllShipments(packages: Package[]): Shipment[] {
-        const remainingPackages = [...packages];
+        const sortedPackages = [...packages].sort((a, b) => b.weight - a.weight);
         const shipments: Shipment[] = [];
 
-        while (remainingPackages.length > 0) {
-            const shipmentPackages: Package[] = [];
-            let currentWeight = 0;
+        for (const pkg of sortedPackages) {
+            let bestShipmentIndex = -1;
+            let minLeftoverCapacity = Infinity;
             
-            remainingPackages.sort((a, b) => b.weight - a.weight);
-            
-            for (let i = 0; i < remainingPackages.length; i++) {
-                const pkg = remainingPackages[i];
+            for (let i = 0; i < shipments.length; i++) {
+                const shipment = shipments[i];
+                const newTotalWeight = shipment.totalWeight + pkg.weight;
                 
-                if (currentWeight + pkg.weight <= fleetCapacity.maxCarriableWeight) {
-                    shipmentPackages.push(pkg);
-                    currentWeight += pkg.weight;
+                if (newTotalWeight <= fleetCapacity.maxCarriableWeight) {
+                    const leftoverCapacity = fleetCapacity.maxCarriableWeight - newTotalWeight;
+                    if (leftoverCapacity < minLeftoverCapacity) {
+                        minLeftoverCapacity = leftoverCapacity;
+                        bestShipmentIndex = i;
+                    }
                 }
             }
             
-            // removal in reverse to avoid index issues
-            for (let i = shipmentPackages.length - 1; i >= 0; i--) {
-                const pkg = shipmentPackages[i];
-                const index = remainingPackages.indexOf(pkg);
-                if (index !== -1) {
-                    remainingPackages.splice(index, 1);
-                }
-            }
-            
-            if (shipmentPackages.length > 0) {
-                const totalDeliveryTime = calculateShipmentTime(shipmentPackages);
+            if (bestShipmentIndex !== -1) {
+                shipments[bestShipmentIndex].packages.push(pkg);
+                shipments[bestShipmentIndex].totalWeight += pkg.weight;
+            } else {
+                const totalDeliveryTime = calculateShipmentTime([pkg]);
                 shipments.push({
-                    packages: shipmentPackages,
-                    totalWeight: shipmentPackages.reduce((sum, pkg) => sum + pkg.weight, 0),
+                    packages: [pkg],
+                    totalWeight: pkg.weight,
                     totalDeliveryTime
                 });
             }
         }
+
+        shipments.forEach(shipment => {
+            shipment.totalDeliveryTime = calculateShipmentTime(shipment.packages);
+        });
 
         // Sort shipments by number of packages (descending), then by total weight (descending), then by delivery time (ascending)
         shipments.sort((a, b) => {

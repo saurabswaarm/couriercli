@@ -1,14 +1,8 @@
 import run from 'inquirer-test';
 import { ENTER } from 'inquirer-test';
-import { spawn } from 'child_process';
-import { promisify } from 'util';
 
-// Test to verify CLI can be called directly with subcommands
-// This test should initially fail since the functionality doesn't exist yet
 describe('CLI Subcommand Execution', () => {
     it('should execute calculatecost command directly without inquirer prompts', async () => {
-        // This test will fail initially because the CLI doesn't support direct subcommand execution
-        // The functionality needs to be implemented in src/index.ts
         const result = await run(['dist/index.js', 'calculatecost'], [
             "100 3", ENTER,
             "PKG1 5 5 OFR001", ENTER,
@@ -23,8 +17,6 @@ describe('CLI Subcommand Execution', () => {
     }, 10000);
 
     it('should execute calculatetime command directly without inquirer prompts', async () => {
-        // This test will fail initially because the CLI doesn't support direct subcommand execution
-        // The functionality needs to be implemented in src/index.ts
         const result = await run(['dist/index.js', 'calculatetime'], [
             "100 5", ENTER,
             "PKG1 50 30 OFR001", ENTER,
@@ -39,10 +31,8 @@ describe('CLI Subcommand Execution', () => {
         const lines: string[] = result.split('\n');
         const pkgLines = lines.filter((line: string) => line.match(/^PKG[1-5] \d+ \d+ \d+\.\d+$/));
         
-        // Should have 5 package lines with the expected format
         expect(pkgLines.length).toBe(5);
         
-        // Create a map of package data for easier validation
         const packageData: { [key: string]: { discount: number; cost: number; time: number } } = {};
         pkgLines.forEach((line: string) => {
             const parts = line.split(' ');
@@ -53,26 +43,25 @@ describe('CLI Subcommand Execution', () => {
             packageData[pkgId] = { discount, cost, time };
         });
         
-        // Validate each package with approximate value matching
         expect(packageData['PKG1'].discount).toBe(0);
         expect(packageData['PKG1'].cost).toBe(750);
-        expect(packageData['PKG1'].time).toBeCloseTo(3.98, 1); // Expected ~3.98
+        expect(packageData['PKG1'].time).toBeCloseTo(3.98, 1);
         
         expect(packageData['PKG2'].discount).toBe(0);
         expect(packageData['PKG2'].cost).toBe(1475);
-        expect(packageData['PKG2'].time).toBeCloseTo(1.78, 1); // Expected ~1.78
+        expect(packageData['PKG2'].time).toBeCloseTo(1.78, 1);
         
         expect(packageData['PKG3'].discount).toBe(0);
         expect(packageData['PKG3'].cost).toBe(2350);
-        expect(packageData['PKG3'].time).toBeCloseTo(1.42, 1); // Expected ~1.42
+        expect(packageData['PKG3'].time).toBeCloseTo(1.42, 1);
         
         expect(packageData['PKG4'].discount).toBe(0);
         expect(packageData['PKG4'].cost).toBe(1500);
-        expect(packageData['PKG4'].time).toBeCloseTo(0.85, 1); // Expected ~0.85
+        expect(packageData['PKG4'].time).toBeCloseTo(0.85, 1);
         
         expect(packageData['PKG5'].discount).toBe(0);
         expect(packageData['PKG5'].cost).toBe(2125);
-        expect(packageData['PKG5'].time).toBeCloseTo(4.19, 1); // Expected ~4.19
+        expect(packageData['PKG5'].time).toBeCloseTo(4.19, 1);
     }, 10000);
 
     it('should show error message when invalid subcommand is provided', async () => {
@@ -82,13 +71,7 @@ describe('CLI Subcommand Execution', () => {
             throw new Error('Expected process to exit with error code');
         } catch (error: any) {
             // For this specific test, we need to check if the process exited with an error
-            // The inquirer-test library might not capture stderr correctly in all cases
-            // Since we know the CLI should output 'Invalid command' to stderr and exit with code 1,
-            // we'll check if the error indicates the process failed as expected
             expect(error).toBeDefined();
-            // The test is actually working correctly - the CLI does output 'Invalid command' 
-            // and exits with code 1, which causes inquirer-test to throw an error
-            // If we get here, the CLI behavior is correct
         }
     }, 10000);
 });
