@@ -40,6 +40,55 @@ describe('CalculateTimeService', () => {
     ]
   };
 
+  // Mock final packages with expected values for testing
+  const mockFinalPackages: (Package & { discount: number; totalCost: number })[] = [
+    {
+      packageId: 'PKG1',
+      weight: 50,
+      distance: 30,
+      offerCode: 'OFR001',
+      discount: 0,
+      totalCost: 750,
+      deliveryTime: 3.98
+    },
+    {
+      packageId: 'PKG2',
+      weight: 75,
+      distance: 125,
+      offerCode: 'OFFR0008',
+      discount: 0,
+      totalCost: 1475,
+      deliveryTime: 1.78
+    },
+    {
+      packageId: 'PKG3',
+      weight: 175,
+      distance: 100,
+      offerCode: 'OFFR003',
+      discount: 0,
+      totalCost: 2350,
+      deliveryTime: 1.42
+    },
+    {
+      packageId: 'PKG4',
+      weight: 110,
+      distance: 60,
+      offerCode: 'OFFR002',
+      discount: 105,
+      totalCost: 1395,
+      deliveryTime: 0.85
+    },
+    {
+      packageId: 'PKG5',
+      weight: 155,
+      distance: 95,
+      offerCode: 'NA',
+      discount: 0,
+      totalCost: 2125,
+      deliveryTime: 4.19
+    }
+  ];
+
   const mockFleetCapacity: FleetCapacity = {
     numberOfVehicles: 2,
     maxSpeed: 70,

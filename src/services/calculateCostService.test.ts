@@ -135,7 +135,7 @@ describe('CalculateCostService', () => {
       };
       
       const result = calculateCostBeforeDiscount(mockPackage, mockRateConfig, 100);
-      // Expected: 100 + (10 * 5) + (5 * 10) = 100 + 50 + 50 = 200
+      // Expected: 100 + (10 * 5) + (5 * 10) = 200
       expect(result).toBe(200);
     });
   });
@@ -193,7 +193,7 @@ describe('CalculateCostService', () => {
     it('should calculate discount correctly', () => {
       const mockCoupon = mockCouponConfig.coupons[0];
       const result = calculateDiscount(200, mockCoupon);
-      // Expected: (200 * 10 / 100) = 20 (the discount amount, not the final cost)
+      // Expected: (200 * 10 / 100) = 20
       expect(result).toBe(20);
     });
   });
