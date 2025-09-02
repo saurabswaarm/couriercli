@@ -43,9 +43,12 @@ describe('CLI Subcommand Execution', () => {
         expect(result).toContain('PKG5 0 2125 4.19');
     }, 10000);
 
-    it('should show help message when invalid subcommand is provided', async () => {
-        // This test will fail initially because the CLI doesn't support subcommand validation
-        const result = await run(['dist/index.js', 'invalidcommand'], []);
-        expect(result).toContain('Invalid command');
+    it('should show error message when invalid subcommand is provided', async () => {
+        try {
+            await run(['dist/index.js', 'invalidcommand'], []);
+            fail('Expected process to exit with error code');
+        } catch (error: any) {
+            expect(error.message || error.toString()).toContain('Invalid command');
+        }
     }, 10000);
 });
