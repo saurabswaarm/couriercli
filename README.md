@@ -9,7 +9,7 @@ Take home assignment for Everest Engineering: courier cli
 
 ## Running the application
 
-The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand will be used for automation tests incase that is used to evaluate anything.
+The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand gives lets one do `node dist/index.js calculatecost`, this can be used for automation tests incase that is used to evaluate anything.
 
 ### Interactive mode:
 
@@ -38,9 +38,9 @@ Available subcommands:
 
 ## Note
 
-I have done my best to implement the time calculation algorithm using greedy and a another approach using backtracking, couldn't give fullest due to personal time constraints. I am out of touch with DSA due to worloads at my current org.
+I have done my best to implement the time calculation algorithm using greedy and a another approach using backtracking, couldn't give fullest due to personal time constraints. I am out of touch with DSA for almost a year due to worloads at my current org.
 
-I have taken assitance of Windsurf to generate the architecture and some of the code and tests.
+I have taken assitance of Windsurf to generate the architecture.md, some of the code and tests.
 
 ### Available Scripts
 
