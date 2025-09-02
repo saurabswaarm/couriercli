@@ -6,6 +6,34 @@ import { CalculateTimeCommand } from './commands/calculatetime.command';
 import { ZodError } from 'zod';
 
 async function main(): Promise<void> {
+    // Check if a subcommand was provided as an argument
+    const args = process.argv.slice(2);
+    
+    if (args.length > 0) {
+        // Handle subcommands directly
+        const subcommand = args[0];
+        
+        switch (subcommand) {
+            case 'calculatecost':
+                const calculateCostCommand = new CalculateCostCommand();
+                await calculateCostCommand.execute();
+                return;
+            case 'calculatetime':
+                const calculateTimeCommand = new CalculateTimeCommand();
+                await calculateTimeCommand.execute();
+                return;
+            case 'help':
+            case '--help':
+            case '-h':
+                showHelp();
+                return;
+            default:
+                console.error('Invalid command');
+                process.exit(1);
+        }
+    }
+    
+    // Default to interactive mode if no subcommand provided
     const answer = await inquirer.prompt([
       {
         type: 'list',
@@ -31,6 +59,27 @@ async function main(): Promise<void> {
         console.error('Invalid command selected');
         process.exit(1);
     }
+}
+
+function showHelp(): void {
+    console.log(`
+Courier CLI - Package delivery cost and time calculator
+
+Usage:
+  couriercli [command]
+
+Available Commands:
+  calculatecost    Calculate delivery costs for packages
+  calculatetime    Calculate delivery times for packages
+  help             Show help information
+
+Examples:
+  couriercli calculatecost
+  couriercli calculatetime
+  couriercli help
+
+If no command is provided, the CLI will run in interactive mode.
+`);
 }
 
 main().catch(error => {
