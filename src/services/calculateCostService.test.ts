@@ -79,6 +79,18 @@ describe('CalculateCostService', () => {
       expect(() => calculateBill(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
         .toThrow('Invalid package with cost generated');
     });
+
+    it('should throw error for zero weight', () => {
+      const invalidDeliveryBatch = { ...mockDeliveryBatch, packages: [{ ...mockDeliveryBatch.packages[0], weight: 0 }] };
+      expect(() => calculateBill(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
+        .toThrow('Invalid package with cost generated');
+    });
+
+    it('should throw error for zero distance', () => {
+      const invalidDeliveryBatch = { ...mockDeliveryBatch, packages: [{ ...mockDeliveryBatch.packages[0], distance: 0 }] };
+      expect(() => calculateBill(mockCouponConfig, mockRateConfig, invalidDeliveryBatch))
+        .toThrow('Invalid package with cost generated');
+    });
   });
 
   describe('calculateBill', () => {

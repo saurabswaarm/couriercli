@@ -39,6 +39,16 @@ describe('CLI entrypoint',
             askingForPackageDetailsString.forEach(str => expect(result).toContain(str));
         });
 
+        it('should not allow zero weight', async () => {
+            const result = await run(['dist/index.js'], [ENTER, ENTER, "100 3", ENTER, "pkg1 0 1 OFFER10", ENTER]);
+            expect(result).toContain('Weight must be a positive number');
+        });
+
+        it('should not allow zero distance', async () => {
+            const result = await run(['dist/index.js'], [ENTER, ENTER, "100 3", ENTER, "pkg1 1 0 OFFER10", ENTER]);
+            expect(result).toContain('Distance must be a positive number')
+        });
+
         it('should display prompt for package details after selecting Calculate Cost, and adding another package, upto limit', async () => {
             const packageCount = 3;
             const promptArray: string[] = [
