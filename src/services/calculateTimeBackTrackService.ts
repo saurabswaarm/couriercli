@@ -1,141 +1,108 @@
-import { calculateDeliveryTimes } from './calculateTimeService';
 import { DeliveryBatch, Package } from '../schemas/package.schema';
 import { FleetCapacity } from '../schemas/fleet.schema';
+import { Shipment } from '../schemas/shipment.schema';
 
-describe('CalculateTimeService', () => {
-  const mockDeliveryBatch: DeliveryBatch = {
-    baseDeliveryCost: 100,
-    numberOfPackages: 5,
-    packages: [
-      {
-        packageId: 'PKG1',
-        weight: 50,
-        distance: 30,
-        offerCode: 'OFR001'
-      },
-      {
-        packageId: 'PKG2',
-        weight: 75,
-        distance: 125,
-        offerCode: 'OFFR0008'
-      },
-      {
-        packageId: 'PKG3',
-        weight: 175,
-        distance: 100,
-        offerCode: 'OFFR003'
-      },
-      {
-        packageId: 'PKG4',
-        weight: 110,
-        distance: 60,
-        offerCode: 'OFFR002'
-      },
-      {
-        packageId: 'PKG5',
-        weight: 155,
-        distance: 95,
-        offerCode: 'NA'
-      }
-    ]
-  };
-
-  // Mock final packages with expected values for testing
-  const mockFinalPackages: (Package & { discount: number; totalCost: number })[] = [
-    {
-      packageId: 'PKG1',
-      weight: 50,
-      distance: 30,
-      offerCode: 'OFR001',
-      discount: 0,
-      totalCost: 750,
-      deliveryTime: 3.98
-    },
-    {
-      packageId: 'PKG2',
-      weight: 75,
-      distance: 125,
-      offerCode: 'OFFR0008',
-      discount: 0,
-      totalCost: 1475,
-      deliveryTime: 1.78
-    },
-    {
-      packageId: 'PKG3',
-      weight: 175,
-      distance: 100,
-      offerCode: 'OFFR003',
-      discount: 0,
-      totalCost: 2350,
-      deliveryTime: 1.42
-    },
-    {
-      packageId: 'PKG4',
-      weight: 110,
-      distance: 60,
-      offerCode: 'OFFR002',
-      discount: 105,
-      totalCost: 1395,
-      deliveryTime: 0.85
-    },
-    {
-      packageId: 'PKG5',
-      weight: 155,
-      distance: 95,
-      offerCode: 'NA',
-      discount: 0,
-      totalCost: 2125,
-      deliveryTime: 4.19
+export function calculateDeliveryTimes(deliveryBatch: DeliveryBatch, fleetCapacity: FleetCapacity): Package[] {
+    function calculateShipmentTime(shipment: Package[]): number {
+        if (shipment.length === 0) return 0;
+        const maxDistance = Math.max(...shipment.map(pkg => pkg.distance));
+        return (2 * maxDistance) / fleetCapacity.maxSpeed;
     }
-  ];
 
-  const mockFleetCapacity: FleetCapacity = {
-    numberOfVehicles: 2,
-    maxSpeed: 70,
-    maxCarriableWeight: 200
-  };
+    function createAllShipments(packages: Package[]): Shipment[] {
+        let bestSolution: Shipment[] = [];
+        let bestShipmentCount = Infinity;
+        
+        const initialShipments: Shipment[] = [{
+            packages: [],
+            totalWeight: 0,
+            totalDeliveryTime: 0
+        }];
+        
+        function backtrack(currentShipments: Shipment[], packageIndex: number): void {
+            if (packageIndex === packages.length) {
+                if (currentShipments.length < bestShipmentCount) {
+                    bestShipmentCount = currentShipments.length;
+                    bestSolution = currentShipments.map(shipment => ({
+                        packages: [...shipment.packages],
+                        totalWeight: shipment.totalWeight,
+                        totalDeliveryTime: shipment.totalDeliveryTime
+                    }));
+                }
+                return;
+            }
+            
+            if (currentShipments.length >= bestShipmentCount) {
+                return;
+            }
+            
+            const currentPackage = packages[packageIndex];
+            
+            for (let i = 0; i < currentShipments.length; i++) {
+                const shipment = currentShipments[i];
+                
+                if (shipment.totalWeight + currentPackage.weight <= fleetCapacity.maxCarriableWeight) {
+                    shipment.packages.push(currentPackage);
+                    shipment.totalWeight += currentPackage.weight;
+                    
+                    backtrack(currentShipments, packageIndex + 1);
+                    
+                    shipment.packages.pop();
+                    shipment.totalWeight -= currentPackage.weight;
+                }
+            }
+            
+            const newShipment: Shipment = {
+                packages: [currentPackage],
+                totalWeight: currentPackage.weight,
+                totalDeliveryTime: 0
+            };
+            
+            currentShipments.push(newShipment);
+            backtrack(currentShipments, packageIndex + 1);
+            currentShipments.pop();
+        }
+        
+        backtrack(initialShipments, 0);
+        
+        bestSolution.forEach(shipment => {
+            shipment.totalDeliveryTime = calculateShipmentTime(shipment.packages);
+        });
+       
+        // based on assignment document
+        bestSolution.sort((a, b) => {
+            if (b.packages.length !== a.packages.length) {
+                return b.packages.length - a.packages.length;
+            }
+            if (b.totalWeight !== a.totalWeight) {
+                return b.totalWeight - a.totalWeight;
+            }
+            return a.totalDeliveryTime - b.totalDeliveryTime;
+        });
+        
+        return bestSolution;
+    }
 
-  describe('calculateDeliveryTimes', () => {
-    it('should calculate delivery times for all packages', () => {
-      const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
-      expect(result).toHaveLength(5);
-      result.forEach((packageWithDeliveryTime: any) => {
-        expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
-        expect(packageWithDeliveryTime.packageId).toBeDefined();
-      });
-    });
+    const deliveryTimes: Record<string, number> = {};
+    const vehicleReturnTimes: number[] = new Array(fleetCapacity.numberOfVehicles).fill(0);
+    const remainingShipments = [...createAllShipments(deliveryBatch.packages)];
 
-    it('should assign delivery times based on vehicle capacity constraints', () => {
-      const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
-      expect(result).toHaveLength(5);
-      result.forEach((packageWithDeliveryTime: any) => {
-        expect(packageWithDeliveryTime.deliveryTime).toBeGreaterThan(0);
-      });
-    });
+    while (remainingShipments.length > 0) {
+        const nextVehicleIndex = vehicleReturnTimes.indexOf(Math.min(...vehicleReturnTimes));
+        const vehicleReturnTime = vehicleReturnTimes[nextVehicleIndex];
+        const shipment = remainingShipments.shift()!;
+        const deliveryTime = vehicleReturnTime + shipment.totalDeliveryTime;
+        shipment.packages.forEach(pkg => {
+            deliveryTimes[pkg.packageId] = vehicleReturnTime + (pkg.distance / fleetCapacity.maxSpeed)
+        });
+        vehicleReturnTimes[nextVehicleIndex] = deliveryTime;
+    }
 
-    it('should return packages with the expected delivery times', () => {
-      const result = calculateDeliveryTimes(mockDeliveryBatch, mockFleetCapacity);
-      
-      result.forEach(pkg => {
-        expect(pkg).toHaveProperty('packageId');
-        expect(pkg).toHaveProperty('weight');
-        expect(pkg).toHaveProperty('distance');
-        expect(pkg).toHaveProperty('offerCode');
-        expect(pkg).toHaveProperty('deliveryTime');
-        expect(pkg.deliveryTime).toBeGreaterThan(0);
-      });
-      
-      const pkg1 = result.find(pkg => pkg.packageId === 'PKG1');
-      const pkg2 = result.find(pkg => pkg.packageId === 'PKG2');
-      const pkg3 = result.find(pkg => pkg.packageId === 'PKG3');
-      const pkg4 = result.find(pkg => pkg.packageId === 'PKG4');
-      const pkg5 = result.find(pkg => pkg.packageId === 'PKG5');
-      
-      expect(pkg1?.deliveryTime).toBeCloseTo(3.98, 1);
-      expect(pkg2?.deliveryTime).toBeCloseTo(1.78, 1);
-      expect(pkg3?.deliveryTime).toBeCloseTo(1.42, 1);
-      expect(pkg4?.deliveryTime).toBeCloseTo(0.85, 1);
-      expect(pkg5?.deliveryTime).toBeCloseTo(4.19, 1);
-    });
-  });
-});
+    return deliveryBatch.packages.map(pkg => ({
+        packageId: pkg.packageId,
+        weight: pkg.weight,
+        distance: pkg.distance,
+        offerCode: pkg.offerCode,
+        deliveryTime: deliveryTimes[pkg.packageId]
+    }));
+}
