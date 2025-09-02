@@ -1,5 +1,5 @@
-import { validateInitialDetails, validatePackageDetails } from '../utils/validationUtils';
-import { processInitialDetails, processPackageDetails } from '../utils/processingUtils';
+import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
+import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
 import { DeliveryBatchSchema, PackageSchema } from '../schemas/package.schema';
 
 // Mock process.exit to prevent tests from exiting
@@ -121,6 +121,64 @@ describe('calculatecost.command validators', () => {
         distance: 5,
         offerCode: 'OFR001'
       });
+    });
+  });
+
+  describe('processFleetDetails', () => {
+    it('should correctly parse valid input', () => {
+      const result = processFleetDetails('2 70 200');
+      expect(result).toEqual({
+        numberOfVehicles: 2,
+        maxSpeed: 70,
+        maxCarriableWeight: 200
+      });
+    });
+
+    it('should correctly parse input with extra whitespace', () => {
+      const result = processFleetDetails(' 2  70  200 ');
+      expect(result).toEqual({
+        numberOfVehicles: 2,
+        maxSpeed: 70,
+        maxCarriableWeight: 200
+      });
+    });
+
+    it('should throw error for empty input', () => {
+      expect(() => processFleetDetails('')).toThrow('Input is required');
+    });
+  });
+
+  describe('validateFleetDetails', () => {
+    it('should return true for valid input', () => {
+      const result = validateFleetDetails('2 70 200');
+      expect(result).toBe(true);
+    });
+
+    it('should return error message for input with wrong number of parts', () => {
+      const result = validateFleetDetails('2 70');
+      expect(result).toBe('Please provide number of vehicles, max speed, and max carriable weight separated by spaces.');
+    });
+
+    it('should throw error for negative number of vehicles', () => {
+      expect(() => validateFleetDetails('-2 70 200')).toThrow('Number of vehicles must be a positive integer');
+    });
+
+    it('should throw error for negative max speed', () => {
+      expect(() => validateFleetDetails('2 -70 200')).toThrow('Maximum speed must be a positive number');
+    });
+
+    it('should throw error for negative max carriable weight', () => {
+      expect(() => validateFleetDetails('2 70 -200')).toThrow('Maximum carriable weight must be a positive number');
+    });
+
+    it('should throw error for zero values', () => {
+      expect(() => validateFleetDetails('0 70 200')).toThrow('Number of vehicles must be a positive integer');
+      expect(() => validateFleetDetails('2 0 200')).toThrow('Maximum speed must be a positive number');
+      expect(() => validateFleetDetails('2 70 0')).toThrow('Maximum carriable weight must be a positive number');
+    });
+
+    it('should throw error for non-integer number of vehicles', () => {
+      expect(() => validateFleetDetails('2.5 70 200')).toThrow('Invalid input: expected int, received number');
     });
   });
 });
