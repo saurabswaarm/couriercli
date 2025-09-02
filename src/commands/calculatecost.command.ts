@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { z } from 'zod';
-import { DeliveryBatch, BaseCostNumPackages, BaseCostNumPackagesSchema, Package, PackageSchema, hasDiscountAndTotalCost} from '../schemas/package.schema';
+import { DeliveryBatch, hasDiscountAndTotalCost} from '../schemas/package.schema';
 import { calculateBill } from '../services/calculateCostService';
 import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
 import { validateInitialDetails, validatePackageDetails } from '../utils/validationUtils';
@@ -12,6 +12,8 @@ export class CalculateCostCommand {
     numberOfPackages: 0,
     packages: []
   };
+
+
 
   public async execute(): Promise<void> {
     await this.promptInitialDetails();

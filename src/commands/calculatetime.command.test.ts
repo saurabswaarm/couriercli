@@ -1,5 +1,6 @@
 import { CalculateTimeCommand } from './calculatetime.command';
 import inquirer from 'inquirer';
+import { calculateDeliveryTimes } from '../services/calculateTimeService';
 
 jest.mock('inquirer', () => ({
   __esModule: true,
@@ -16,7 +17,7 @@ describe('CalculateTimeCommand', () => {
   let inquirerPromptSpy: jest.Mock;
 
   beforeEach(() => {
-    calculateTimeCommand = new CalculateTimeCommand();
+    calculateTimeCommand = new CalculateTimeCommand(calculateDeliveryTimes);
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     inquirerPromptSpy = inquirer.prompt as unknown as jest.Mock;
     jest.clearAllMocks();

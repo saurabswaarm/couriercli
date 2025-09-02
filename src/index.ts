@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import { CalculateCostCommand } from './commands/calculatecost.command';
 import { CalculateTimeCommand } from './commands/calculatetime.command';
 import { ZodError } from 'zod';
+import { calculateDeliveryTimes } from './services/calculateTimeService';
 
 async function main(): Promise<void> {
     // Check if a subcommand was provided as an argument
@@ -19,7 +20,7 @@ async function main(): Promise<void> {
                 await calculateCostCommand.execute();
                 return;
             case 'calculatetime':
-                const calculateTimeCommand = new CalculateTimeCommand();
+                const calculateTimeCommand = new CalculateTimeCommand(calculateDeliveryTimes);
                 await calculateTimeCommand.execute();
                 return;
             case 'help':
@@ -52,7 +53,7 @@ async function main(): Promise<void> {
         await calculateCostCommand.execute();
         break;
       case 'calculatetime':
-        const calculateTimeCommand = new CalculateTimeCommand();
+        const calculateTimeCommand = new CalculateTimeCommand(calculateDeliveryTimes);
         await calculateTimeCommand.execute();
         break;
       default:

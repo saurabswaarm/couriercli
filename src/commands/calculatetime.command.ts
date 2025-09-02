@@ -4,11 +4,12 @@ import { DeliveryBatch, hasDeliveryTime, hasDiscountAndTotalCost } from '../sche
 import { FleetCapacity, FleetCapacitySchema } from '../schemas/fleet.schema';
 import { validateInitialDetails, validatePackageDetails, validateFleetDetails } from '../utils/validationUtils';
 import { processInitialDetails, processPackageDetails, processFleetDetails } from '../utils/processingUtils';
-import { calculateDeliveryTimes } from '../services/calculateTimeService';
 import { calculateSingleBill } from '../services/calculateCostService';
 import { loadCouponConfig, loadRateConfig } from '../utils/configLoader';
+import { CalcTime } from '../types/calcTimeType';
 
 export class CalculateTimeCommand {
+  private calculateDeliveryTimes: CalcTime;
   private deliveryBatch: DeliveryBatch = {
     baseDeliveryCost: 0,
     numberOfPackages: 0,
@@ -20,6 +21,14 @@ export class CalculateTimeCommand {
     maxSpeed: 0,
     maxCarriableWeight: 0
   };
+
+
+  constructor(
+    private calculateDeliveryTimesFunction: CalcTime
+  ) {
+    this.calculateDeliveryTimes = this.calculateDeliveryTimesFunction;
+  }
+   
 
   public async execute(): Promise<void> {
     await this.promptInitialDetails();
@@ -41,7 +50,7 @@ export class CalculateTimeCommand {
       const couponConfig = loadCouponConfig();
       const rateConfig = loadRateConfig();
 
-      const packagesWithDeliveryTime = calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
+      const packagesWithDeliveryTime = this.calculateDeliveryTimes(this.deliveryBatch, this.fleetCapacity);
       const packagesWithCostAndDeliveryTime = packagesWithDeliveryTime.map((packageWithDeliveryTime) => {
         const singleBill = calculateSingleBill(packageWithDeliveryTime, couponConfig, rateConfig, this.deliveryBatch.baseDeliveryCost);
         console.log('singlebill', singleBill);
