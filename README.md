@@ -2,13 +2,14 @@
 
 Take home assignment for Everest Engineering: courier cli
 
-## Configuration
+## Configuration and Behavioural Tests
 
-The coupon codes and the courier rate are configurable via respective json files in the configs folder.
+- The coupon codes and the courier rate are configurable via respective json files in the configs folder.
+- Behavioural tests can be found in the tests/behavioural folder.
 
 ## Running the application
 
-The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand will be used for automation tests incase you guys are using that.
+The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand will be used for automation tests incase that is used to evaluate anything.
 
 ### Interactive mode:
 
@@ -31,9 +32,9 @@ Available subcommands:
 
 ## Technologies and Patters used
 
--- I have tried to use TDD(using jest itself) as much as possible, writing tests before the actual implementation, you can find the commits marked with "TDD" in the git history
--- I am curently working with Typescript at work hence chose node.js with tsc
--- I have used Zod for validation and it generated types too so it is great.
+- I have tried to use TDD(using jest itself) as much as possible, writing tests before the actual implementation, you can find the commits marked with "TDD" in the git history
+- I am curently working with Typescript at work hence chose node.js with tsc
+- I have used Zod for validation and it generated types too so it is great.
 
 ## Note
 
