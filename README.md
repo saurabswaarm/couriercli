@@ -1,6 +1,6 @@
 # Courier CLI
 
-Take home assignment for Everest Engineering: courier cli
+This cli helps you calculate package costs and delivery times.
 
 ## Configuration and Behavioural Tests
 
