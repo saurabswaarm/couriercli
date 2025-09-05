@@ -9,7 +9,7 @@ This cli helps you calculate package costs and delivery times.
 
 ## Running the application
 
-The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand gives lets one do `node dist/index.js calculatecost`, this can be used for automation tests incase that is used to evaluate anything.
+The cli has two modes, interactive and subcommand, interactive will give you a menu but subcommand lets one do `node dist/index.js calculatecost`, this can be used for automation tests incase that is used to evaluate anything.
 
 ### Interactive mode:
 
